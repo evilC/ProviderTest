@@ -33,13 +33,16 @@ namespace TestApp
             var diT16K = new DeviceDescriptor("VID_044F&PID_B10A");
             var xbox1 = new DeviceDescriptor("Xbox");
 
-            di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
-            di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
-            di.SubscribeInput(new InputDescriptor(divJoy, button128), new TestObserver("DI vJoy Button 128"));
-            di.SubscribeInput(new InputDescriptor(divJoy, pov1Down), new TestObserver("DI vJoy POV 1 Down"));
-            di.SubscribeInput(new InputDescriptor(divJoy, pov1Left), new TestObserver("DI vJoy POV 1 Left"));
-            di.SubscribeInput(new InputDescriptor(divJoy, pov2Down), new TestObserver("DI vJoy POV 2 Down"));
-            di.SubscribeInput(new InputDescriptor(divJoy, pov2Left), new TestObserver("DI vJoy POV 2 Left"));
+            //di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
+            //di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
+            //di.SubscribeInput(new InputDescriptor(divJoy, button128), new TestObserver("DI vJoy Button 128"));
+            //di.SubscribeInput(new InputDescriptor(divJoy, pov1Down), new TestObserver("DI vJoy POV 1 Down"));
+            //di.SubscribeInput(new InputDescriptor(divJoy, pov1Left), new TestObserver("DI vJoy POV 1 Left"));
+            //di.SubscribeInput(new InputDescriptor(divJoy, pov2Down), new TestObserver("DI vJoy POV 2 Down"));
+            //di.SubscribeInput(new InputDescriptor(divJoy, pov2Left), new TestObserver("DI vJoy POV 2 Left"));
+
+            di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode:"));
+            di.SetBindModeState(divJoy, true);
 
             //di.SubscribeInput(new InputDescriptor(diT16K, button1), new TestObserver("DI T16k Button 1"));
             //di.SubscribeInput(new InputDescriptor(diT16K, axis1), new TestObserver("DI T16k Axis X"));
@@ -71,4 +74,30 @@ namespace TestApp
             throw new NotImplementedException();
         }
     }
+
+    public class BindModeObserver : IObserver<InputModeReport>
+    {
+        public string Name { get; }
+
+        public BindModeObserver(string name)
+        {
+            Name = name;
+        }
+
+        public void OnNext(InputModeReport state)
+        {
+            Console.WriteLine($"[{Name}] State: {state.InputDescriptor.BindingDescriptor}, Value: {state.Value}");
+        }
+
+        public void OnError(Exception error)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnCompleted()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }

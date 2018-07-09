@@ -11,6 +11,7 @@ namespace DirectInput
     {
         private readonly Dictionary<string, DiDevice> _devices = new Dictionary<string, DiDevice>();
 
+        // ToDo: Add support for device instances
         public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
             if (!DiWrapper.Instance.ConnectedDevices.ContainsKey(subReq.DeviceDescriptor.DeviceHandle))
@@ -18,11 +19,28 @@ namespace DirectInput
                 throw new Exception("Device not found");
             }
 
-            if (!_devices.ContainsKey(subReq.DeviceDescriptor.DeviceHandle))
-            {
-                _devices.Add(subReq.DeviceDescriptor.DeviceHandle, new DiDevice(subReq.DeviceDescriptor));
-            }
+            CreateDevice(subReq.DeviceDescriptor);
             return _devices[subReq.DeviceDescriptor.DeviceHandle].SubscribeInput(subReq, observer);
+        }
+
+        public void CreateDevice(DeviceDescriptor deviceDescriptor)
+        {
+            if (!_devices.ContainsKey(deviceDescriptor.DeviceHandle))
+            {
+                _devices.Add(deviceDescriptor.DeviceHandle, new DiDevice(deviceDescriptor));
+            }
+        }
+
+        public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputModeReport> observer)
+        {
+            CreateDevice(deviceDescriptor);
+            return _devices[deviceDescriptor.DeviceHandle].Subscribe(observer);
+        }
+
+        public void SetBindModeState(DeviceDescriptor deviceDescriptor, bool state)
+        {
+            CreateDevice(deviceDescriptor);
+            _devices[deviceDescriptor.DeviceHandle].SetBindModeState(state);
         }
     }
 }

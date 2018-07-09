@@ -15,6 +15,7 @@ namespace Common
     {
         IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer);
         void ProcessSubscriptionMode(TPollType state);
+        void ProcessBindMode(TPollType state);
     }
 
     /// <summary>

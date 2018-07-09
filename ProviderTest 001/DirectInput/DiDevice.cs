@@ -9,11 +9,13 @@ using SharpDX.DirectInput;
 
 namespace DirectInput
 {
-    class DiDevice
+    class DiDevice : IObservable<InputModeReport>
     {
         private readonly Joystick _device;
         private DeviceDescriptor _deviceDescriptor;
         private readonly Dictionary<(BindingType, int), IPollProcessor<JoystickUpdate>> _pollProcessors = new Dictionary<(BindingType, int), IPollProcessor<JoystickUpdate>>();
+        private readonly List<IObserver<InputModeReport>> _bindModeObservers = new List<IObserver<InputModeReport>>();
+        private bool _bindModeState = false;
 
         public DiDevice(DeviceDescriptor deviceDescriptor)
         {
@@ -31,16 +33,28 @@ namespace DirectInput
 
         private void BuildPollProcessors()
         {
+            // ToDo: Read Device Caps
             for (var i = 0; i < 128; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiButtonProcessor(descriptor);
+                var proc = new DiButtonProcessor(descriptor);
+                proc.OnBindMode += OnBindMode;
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = proc;
             }
 
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiPovProcessor(descriptor);
+                var proc = new DiPovProcessor(descriptor, OnBindMode);
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = proc;
+            }
+        }
+
+        private void OnBindMode(object sender, InputReportEventArgs inputReportEventArgs)
+        {
+            foreach (var bindModeObserver in _bindModeObservers)
+            {
+                bindModeObserver.OnNext(inputReportEventArgs.InputModeReport);
             }
         }
 
@@ -48,15 +62,31 @@ namespace DirectInput
         {
             while (true)
             {
-                var data = _device.GetBufferedData();
-                foreach (var state in data)
+                while (_bindModeState)
                 {
-                    var processorTuple = GetInputProcessorKey(state.Offset);
-                    if (!_pollProcessors.ContainsKey(processorTuple)) continue;
+                    var data = _device.GetBufferedData();
+                    foreach (var state in data)
+                    {
+                        var processorTuple = GetInputProcessorKey(state.Offset);
+                        if (!_pollProcessors.ContainsKey(processorTuple)) continue;
 
-                    _pollProcessors[processorTuple].ProcessSubscriptionMode(state);
+                        _pollProcessors[processorTuple].ProcessBindMode(state);
+                    }
+                    Thread.Sleep(10);
                 }
-                Thread.Sleep(10);
+
+                while (!_bindModeState)
+                {
+                    var data = _device.GetBufferedData();
+                    foreach (var state in data)
+                    {
+                        var processorTuple = GetInputProcessorKey(state.Offset);
+                        if (!_pollProcessors.ContainsKey(processorTuple)) continue;
+
+                        _pollProcessors[processorTuple].ProcessSubscriptionMode(state);
+                    }
+                    Thread.Sleep(10);
+                }
             }
         }
 
@@ -73,5 +103,16 @@ namespace DirectInput
             return (BindingType.Axis, (int)offset / 4);
         }
 
+        // Bind Mode subscribe
+        public IDisposable Subscribe(IObserver<InputModeReport> observer)
+        {
+            _bindModeObservers.Add(observer);
+            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer);
+        }
+
+        public void SetBindModeState(bool state)
+        {
+            _bindModeState = state;
+        }
     }
 }

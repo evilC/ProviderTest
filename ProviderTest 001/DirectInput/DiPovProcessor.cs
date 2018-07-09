@@ -12,12 +12,12 @@ namespace DirectInput
     {
         private readonly List<DiPovDirectionProcessor> _directionProcessors = new List<DiPovDirectionProcessor>();
 
-        public DiPovProcessor(InputDescriptor inputDescriptor)
+        public DiPovProcessor(InputDescriptor inputDescriptor, EventHandler<InputReportEventArgs> bindModeHandler)
         {
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(inputDescriptor.DeviceDescriptor, new BindingDescriptor(BindingType.POV, inputDescriptor.BindingDescriptor.Index, i));
-                _directionProcessors.Add(new DiPovDirectionProcessor(descriptor));
+                _directionProcessors.Add(new DiPovDirectionProcessor(descriptor, bindModeHandler));
             }
         }
 
@@ -34,6 +34,14 @@ namespace DirectInput
                 {
                     _directionProcessors[i].ProcessSubscriptionMode(state);
                 }
+            }
+        }
+
+        public void ProcessBindMode(JoystickUpdate state)
+        {
+            for (var i = 0; i < 4; i++)
+            {
+                _directionProcessors[i].ProcessBindMode(state);
             }
         }
     }
