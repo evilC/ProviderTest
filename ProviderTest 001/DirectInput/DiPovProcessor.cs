@@ -12,18 +12,18 @@ namespace DirectInput
     {
         private readonly List<DiPovDirectionProcessor> _directionProcessors = new List<DiPovDirectionProcessor>();
 
-        public DiPovProcessor(BindingDescriptor bindingDescriptor)
+        public DiPovProcessor(InputDescriptor inputDescriptor)
         {
             for (var i = 0; i < 4; i++)
             {
-                var descriptor = new BindingDescriptor(BindingType.POV, bindingDescriptor.Index, i);
+                var descriptor = new InputDescriptor(inputDescriptor.DeviceDescriptor, new BindingDescriptor(BindingType.POV, inputDescriptor.BindingDescriptor.Index, i));
                 _directionProcessors.Add(new DiPovDirectionProcessor(descriptor));
             }
         }
 
-        public IDisposable Subscribe(BindingDescriptor bindingDescriptor, IObserver<InputModeReport> observer)
+        public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
-            return _directionProcessors[bindingDescriptor.SubIndex].Subscribe(bindingDescriptor, observer);
+            return _directionProcessors[subReq.BindingDescriptor.SubIndex].Subscribe(subReq, observer);
         }
 
         public void ProcessSubscriptionMode(JoystickUpdate state)

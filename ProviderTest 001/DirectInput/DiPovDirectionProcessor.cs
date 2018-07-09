@@ -7,15 +7,15 @@ namespace DirectInput
 {
     class DiPovDirectionProcessor : IObservableInput<InputModeReport>
     {
-        private readonly BindingDescriptor _bindingDescriptor;
+        private readonly InputDescriptor _inputDescriptor;
         private readonly int _thisAngle;
         private int _lastState;
         private readonly List<IObserver<InputModeReport>> _observers = new List<IObserver<InputModeReport>>();
 
-        public DiPovDirectionProcessor(BindingDescriptor bindingDescriptor)
+        public DiPovDirectionProcessor(InputDescriptor inputDescriptor)
         {
-            _bindingDescriptor = bindingDescriptor;
-            _thisAngle = _bindingDescriptor.SubIndex * 9000;
+            _inputDescriptor = inputDescriptor;
+            _thisAngle = _inputDescriptor.BindingDescriptor.SubIndex * 9000;
         }
 
         public IDisposable Subscribe(IObserver<InputModeReport> observer)
@@ -24,7 +24,7 @@ namespace DirectInput
             return new ObservableUnsubscriber<InputModeReport>(_observers, observer);
         }
 
-        public IDisposable Subscribe(BindingDescriptor bindingDescriptor, IObserver<InputModeReport> observer)
+        public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
             return Subscribe(observer);
         }
@@ -40,7 +40,7 @@ namespace DirectInput
             {
                 foreach (var observer in _observers)
                 {
-                    observer.OnNext(new InputModeReport(_bindingDescriptor, newDirectionState));
+                    observer.OnNext(new InputModeReport(_inputDescriptor, newDirectionState));
                 }
                 _lastState = newDirectionState;
             }

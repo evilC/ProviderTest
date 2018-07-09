@@ -13,7 +13,7 @@ namespace Common
     /// </summary>
     public interface IPollProcessor<TPollType>
     {
-        IDisposable Subscribe(BindingDescriptor bindingDescriptor, IObserver<InputModeReport> observer);
+        IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer);
         void ProcessSubscriptionMode(TPollType state);
     }
 

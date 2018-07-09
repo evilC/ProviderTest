@@ -10,22 +10,22 @@ namespace DirectInput
 {
     class DiButtonProcessor : IPollProcessor<JoystickUpdate>, IObservableInput<InputModeReport>
     {
-        private readonly BindingDescriptor _bindingDescriptor;
+        private readonly InputDescriptor _inputDescriptor;
         private readonly List<IObserver<InputModeReport>> _observers = new List<IObserver<InputModeReport>>();
 
-        public DiButtonProcessor(BindingDescriptor bindingDescriptor)
+        public DiButtonProcessor(InputDescriptor inputDescriptor)
         {
-            _bindingDescriptor = bindingDescriptor;
+            _inputDescriptor = inputDescriptor;
         }
 
-        public IDisposable Subscribe(BindingDescriptor bindingDescriptor, IObserver<InputModeReport> observer)
+        public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
             return Subscribe(observer);
         }
 
         public void ProcessSubscriptionMode(JoystickUpdate state)
         {
-            var report = new InputModeReport(_bindingDescriptor, state.Value == 128 ? 1 : 0);
+            var report = new InputModeReport(_inputDescriptor, state.Value == 128 ? 1 : 0);
             foreach (var observer in _observers)
             {
                 observer.OnNext(report);

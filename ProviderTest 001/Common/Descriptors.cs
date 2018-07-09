@@ -13,6 +13,18 @@ namespace Common
         POV
     }
 
+    public struct InputDescriptor
+    {
+        public DeviceDescriptor DeviceDescriptor { get; }
+        public BindingDescriptor BindingDescriptor { get; }
+
+        public InputDescriptor(DeviceDescriptor deviceDescriptor, BindingDescriptor bindingDescriptor)
+        {
+            DeviceDescriptor = deviceDescriptor;
+            BindingDescriptor = bindingDescriptor;
+        }
+    }
+
     public struct BindingDescriptor
     {
         public BindingDescriptor(BindingType type, int index, int subIndex = 0)

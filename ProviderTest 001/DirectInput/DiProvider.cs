@@ -11,18 +11,18 @@ namespace DirectInput
     {
         private readonly Dictionary<string, DiDevice> _devices = new Dictionary<string, DiDevice>();
 
-        public IDisposable SubscribeInput(DeviceDescriptor deviceDescriptor, BindingDescriptor inputDescriptor, IObserver<InputModeReport> observer)
+        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
-            if (!DiWrapper.Instance.ConnectedDevices.ContainsKey(deviceDescriptor.DeviceHandle))
+            if (!DiWrapper.Instance.ConnectedDevices.ContainsKey(subReq.DeviceDescriptor.DeviceHandle))
             {
                 throw new Exception("Device not found");
             }
 
-            if (!_devices.ContainsKey(deviceDescriptor.DeviceHandle))
+            if (!_devices.ContainsKey(subReq.DeviceDescriptor.DeviceHandle))
             {
-                _devices.Add(deviceDescriptor.DeviceHandle, new DiDevice(deviceDescriptor));
+                _devices.Add(subReq.DeviceDescriptor.DeviceHandle, new DiDevice(subReq.DeviceDescriptor));
             }
-            return _devices[deviceDescriptor.DeviceHandle].SubscribeInput(inputDescriptor, observer);
+            return _devices[subReq.DeviceDescriptor.DeviceHandle].SubscribeInput(subReq, observer);
         }
     }
 }

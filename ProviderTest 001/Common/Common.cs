@@ -6,12 +6,12 @@ namespace Common
 {
     public struct InputModeReport
     {
-        public InputModeReport(BindingDescriptor bindingDescriptor, int value)
+        public InputModeReport(InputDescriptor inputDescriptor, int value)
         {
-            BindingDescriptor = bindingDescriptor;
+            InputDescriptor = inputDescriptor;
             Value = value;
         }
-        public BindingDescriptor BindingDescriptor { get; }
+        public InputDescriptor InputDescriptor { get; }
         public int Value { get; }
     }
 }

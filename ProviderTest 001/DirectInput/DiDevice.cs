@@ -33,14 +33,14 @@ namespace DirectInput
         {
             for (var i = 0; i < 128; i++)
             {
-                var descriptor = new BindingDescriptor(BindingType.Button, i);
-                _pollProcessors[descriptor.ToShortTuple()] = new DiButtonProcessor(descriptor);
+                var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiButtonProcessor(descriptor);
             }
 
             for (var i = 0; i < 4; i++)
             {
-                var descriptor = new BindingDescriptor(BindingType.POV, i);
-                _pollProcessors[descriptor.ToShortTuple()] = new DiPovProcessor(descriptor);
+                var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, i));
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiPovProcessor(descriptor);
             }
         }
 
@@ -60,9 +60,9 @@ namespace DirectInput
             }
         }
 
-        public IDisposable SubscribeInput(BindingDescriptor inputDescriptor, IObserver<InputModeReport> observer)
+        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
-            return _pollProcessors[(inputDescriptor.Type, inputDescriptor.Index)].Subscribe(inputDescriptor, observer);
+            return _pollProcessors[(subReq.BindingDescriptor.Type, subReq.BindingDescriptor.Index)].Subscribe(subReq, observer);
         }
 
         public static (BindingType, int) GetInputProcessorKey(JoystickOffset offset)
