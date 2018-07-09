@@ -12,10 +12,10 @@ namespace DirectInput
     class DiDevice : IObservable<InputModeReport>
     {
         private readonly Joystick _device;
-        private DeviceDescriptor _deviceDescriptor;
+        private readonly DeviceDescriptor _deviceDescriptor;
         private readonly Dictionary<(BindingType, int), IPollProcessor<JoystickUpdate>> _pollProcessors = new Dictionary<(BindingType, int), IPollProcessor<JoystickUpdate>>();
         private readonly List<IObserver<InputModeReport>> _bindModeObservers = new List<IObserver<InputModeReport>>();
-        private bool _bindModeState = false;
+        private bool _bindModeState;
 
         public DiDevice(DeviceDescriptor deviceDescriptor)
         {
@@ -68,7 +68,7 @@ namespace DirectInput
                     foreach (var state in data)
                     {
                         var processorTuple = GetInputProcessorKey(state.Offset);
-                        if (!_pollProcessors.ContainsKey(processorTuple)) continue;
+                        if (!_pollProcessors.ContainsKey(processorTuple)) continue; // ToDo: Handle properly
 
                         _pollProcessors[processorTuple].ProcessBindMode(state);
                     }
@@ -81,7 +81,9 @@ namespace DirectInput
                     foreach (var state in data)
                     {
                         var processorTuple = GetInputProcessorKey(state.Offset);
-                        if (!_pollProcessors.ContainsKey(processorTuple)) continue;
+                        if (!_pollProcessors.ContainsKey(processorTuple)    // ToDo: Should not happen in production, throw?
+                            || _pollProcessors[processorTuple].GetObserverCount() == 0)
+                            continue;
 
                         _pollProcessors[processorTuple].ProcessSubscriptionMode(state);
                     }

@@ -11,7 +11,7 @@ namespace Common
     /// The class does not need to handle Subscription or poll itself, it may just forward the request on to another class
     /// <typeparam name="TPollType">The type of the report</typeparam>
     /// </summary>
-    public interface IPollProcessor<TPollType>
+    public interface IPollProcessor<TPollType> : IObservableBase
     {
         IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer);
         void ProcessSubscriptionMode(TPollType state);
@@ -23,7 +23,12 @@ namespace Common
     /// This is used to make polling efficient by only processing inputs which have subscribers
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IObservableInput<T> : IObservable<T>
+    public interface IObservableInput<T> : IObservableBase, IObservable<T>
+    {
+        
+    }
+
+    public interface IObservableBase
     {
         int GetObserverCount();
     }

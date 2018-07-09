@@ -44,5 +44,15 @@ namespace DirectInput
                 _directionProcessors[i].ProcessBindMode(state);
             }
         }
+
+        public int GetObserverCount()
+        {
+            var count = 0;
+            for (var i = 0; i < 4; i++)
+            {
+                count += _directionProcessors[i].GetObserverCount();
+            }
+            return count;
+        }
     }
 }
