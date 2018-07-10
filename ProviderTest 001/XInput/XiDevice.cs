@@ -9,13 +9,14 @@ using SharpDX.XInput;
 
 namespace XInput
 {
-    class XiDevice : IObservable<InputModeReport>
+    class XiDevice : IObservable<InputModeReport>, IDevice
     {
         private readonly Dictionary<(BindingType, int, int), IPollProcessor<State>> _pollProcessors = new Dictionary<(BindingType, int, int), IPollProcessor<State>>();
         private readonly DeviceDescriptor _deviceDescriptor;
         private readonly List<IObserver<InputModeReport>> _bindModeObservers = new List<IObserver<InputModeReport>>();
 
         private PollMode _pollMode = PollMode.Subscription;
+        private readonly Thread _pollThread;
 
         private readonly Controller _device;
 
@@ -26,8 +27,8 @@ namespace XInput
             BuildPollProcessors();
             _deviceDescriptor = deviceDescriptor;
 
-            var pollThread = new Thread(PollThread);
-            pollThread.Start();
+            _pollThread = new Thread(PollThread);
+            _pollThread.Start();
         }
 
         private void PollThread()
@@ -131,5 +132,10 @@ namespace XInput
             _pollMode = state ? PollMode.Bind : PollMode.Subscription;
         }
 
+        public void Dispose()
+        {
+            _pollThread.Abort();
+            _pollThread.Join();
+        }
     }
 }

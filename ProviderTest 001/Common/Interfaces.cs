@@ -28,6 +28,11 @@ namespace Common
         
     }
 
+    public interface IDevice : IDisposable
+    {
+        void SetBindModeState(bool state);
+    }
+
     public interface IObservableBase
     {
         int GetObserverCount();

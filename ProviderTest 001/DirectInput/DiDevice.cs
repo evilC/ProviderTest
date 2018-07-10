@@ -9,13 +9,14 @@ using SharpDX.DirectInput;
 
 namespace DirectInput
 {
-    class DiDevice : IObservable<InputModeReport>
+    class DiDevice : IObservable<InputModeReport>, IDevice
     {
         private readonly Joystick _device;
         private readonly DeviceDescriptor _deviceDescriptor;
         private readonly Dictionary<(BindingType, int), IPollProcessor<JoystickUpdate>> _pollProcessors = new Dictionary<(BindingType, int), IPollProcessor<JoystickUpdate>>();
         private readonly List<IObserver<InputModeReport>> _bindModeObservers = new List<IObserver<InputModeReport>>();
         private PollMode _pollMode = PollMode.Subscription;
+        private readonly Thread _pollThread;
 
         public DiDevice(DeviceDescriptor deviceDescriptor)
         {
@@ -27,9 +28,40 @@ namespace DirectInput
             _device.Properties.BufferSize = 128;
             _device.Acquire();
 
-            var pollThread = new Thread(PollThread);
-            pollThread.Start();
+            _pollThread = new Thread(PollThread);
+            _pollThread.Start();
         }
+
+        #region Interfaces
+        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
+        {
+            return _pollProcessors[(subReq.BindingDescriptor.Type, subReq.BindingDescriptor.Index)].Subscribe(subReq, observer);
+        }
+
+        #region IObservable
+
+        // Bind Mode subscribe
+        public IDisposable Subscribe(IObserver<InputModeReport> observer)
+        {
+            _bindModeObservers.Add(observer);
+            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer);
+        }
+
+        #endregion
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            _pollThread.Abort();
+            _pollThread.Join();
+            _device?.Dispose();
+        }
+
+        #endregion
+
+        #endregion
+
 
         private void BuildPollProcessors()
         {
@@ -89,24 +121,12 @@ namespace DirectInput
             }
         }
 
-        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
-        {
-            return _pollProcessors[(subReq.BindingDescriptor.Type, subReq.BindingDescriptor.Index)].Subscribe(subReq, observer);
-        }
-
         public static (BindingType, int) GetInputProcessorKey(JoystickOffset offset)
         {
             if (offset > JoystickOffset.Buttons127) throw new NotImplementedException(); // force etc not implemented
             if (offset >= JoystickOffset.Buttons0) return (BindingType.Button, offset - JoystickOffset.Buttons0);
             if (offset >= JoystickOffset.PointOfViewControllers0) return (BindingType.POV, (offset - JoystickOffset.PointOfViewControllers0) / 4);
             return (BindingType.Axis, (int)offset / 4);
-        }
-
-        // Bind Mode subscribe
-        public IDisposable Subscribe(IObserver<InputModeReport> observer)
-        {
-            _bindModeObservers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer);
         }
 
         public void SetBindModeState(bool state)

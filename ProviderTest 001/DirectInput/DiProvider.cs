@@ -7,7 +7,7 @@ using Common;
 
 namespace DirectInput
 {
-    public class DiProvider
+    public class DiProvider : IDisposable
     {
         private readonly Dictionary<DeviceDescriptor, DiDevice> _devices = new Dictionary<DeviceDescriptor, DiDevice>();
 
@@ -41,6 +41,10 @@ namespace DirectInput
         {
             CreateDevice(deviceDescriptor);
             _devices[deviceDescriptor].SetBindModeState(state);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }
