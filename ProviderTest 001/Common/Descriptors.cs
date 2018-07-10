@@ -6,13 +6,6 @@ using System.Threading.Tasks;
 
 namespace Common
 {
-    public enum BindingType
-    {
-        Axis,
-        Button,
-        POV
-    }
-
     public struct InputDescriptor
     {
         public DeviceDescriptor DeviceDescriptor { get; }
