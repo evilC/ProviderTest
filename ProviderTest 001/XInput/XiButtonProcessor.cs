@@ -59,6 +59,17 @@ namespace XInput
             _lastValue = thisValue;
         }
 
+        public void ProcessBindMode(State thisState)
+        {
+            var thisValue = GetValue(thisState);
+            if (thisValue == _lastValue) return;
+
+            var report = BuildReport(thisState);
+            OnBindMode(this, new InputReportEventArgs(report));
+
+            _lastValue = thisValue;
+        }
+
         private int GetValue(State thisState)
         {
             return (_gamepadButtonFlag & thisState.Gamepad.Buttons) == _gamepadButtonFlag ? 1 : 0;
@@ -67,11 +78,6 @@ namespace XInput
         private InputModeReport BuildReport(State state)
         {
             return new InputModeReport(_inputDescriptor, GetValue(state));
-        }
-
-        public void ProcessBindMode(State state)
-        {
-            throw new NotImplementedException();
         }
 
         public IDisposable Subscribe(IObserver<InputModeReport> observer)

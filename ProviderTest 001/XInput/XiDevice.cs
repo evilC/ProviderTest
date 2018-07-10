@@ -9,11 +9,12 @@ using SharpDX.XInput;
 
 namespace XInput
 {
-    class XiDevice
+    class XiDevice : IObservable<InputModeReport>
     {
         private readonly Dictionary<(BindingType, int, int), IPollProcessor<State>> _pollProcessors = new Dictionary<(BindingType, int, int), IPollProcessor<State>>();
         private readonly DeviceDescriptor _deviceDescriptor;
         private readonly List<IObserver<InputModeReport>> _bindModeObservers = new List<IObserver<InputModeReport>>();
+        private bool _bindModeState;
 
         private readonly Controller _device;
 
@@ -32,26 +33,53 @@ namespace XInput
         {
             while (true)
             {
-                var thisState = _device.GetState();
-
-                // Buttons
-                for (var i = 0; i < 10; i++)
+                while (_bindModeState)
                 {
-                    var buttonTuple = BuildTuple(BindingType.Button, i);
-                    if (_pollProcessors[buttonTuple].GetObserverCount() == 0) continue;
+                    var thisState = _device.GetState();
 
-                    _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
+                    // Buttons
+                    for (var i = 0; i < 10; i++)
+                    {
+                        var buttonTuple = BuildTuple(BindingType.Button, i);
+
+                        _pollProcessors[buttonTuple].ProcessBindMode(thisState);
+                    }
+
+                    // DPad
+                    for (var i = 0; i < 4; i++)
+                    {
+                        var buttonTuple = BuildTuple(BindingType.POV, 0, i);
+
+                        _pollProcessors[buttonTuple].ProcessBindMode(thisState);
+                    }
+
+                    Thread.Sleep(10);
                 }
 
-                for (var i = 0; i < 4; i++)
+                while (!_bindModeState)
                 {
-                    var buttonTuple = BuildTuple(BindingType.POV, 0, i);
-                    if (_pollProcessors[buttonTuple].GetObserverCount() == 0) continue;
+                    var thisState = _device.GetState();
 
-                    _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
+                    // Buttons
+                    for (var i = 0; i < 10; i++)
+                    {
+                        var buttonTuple = BuildTuple(BindingType.Button, i);
+                        if (_pollProcessors[buttonTuple].GetObserverCount() == 0) continue;
+
+                        _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
+                    }
+
+                    // DPad
+                    for (var i = 0; i < 4; i++)
+                    {
+                        var buttonTuple = BuildTuple(BindingType.POV, 0, i);
+                        if (_pollProcessors[buttonTuple].GetObserverCount() == 0) continue;
+
+                        _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
+                    }
+
+                    Thread.Sleep(10);
                 }
-
-                Thread.Sleep(10);
             }
         }
 
@@ -89,5 +117,18 @@ namespace XInput
                 bindModeObserver.OnNext(inputReportEventArgs.InputModeReport);
             }
         }
+
+        // Bind Mode subscribe
+        public IDisposable Subscribe(IObserver<InputModeReport> observer)
+        {
+            _bindModeObservers.Add(observer);
+            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer);
+        }
+
+        public void SetBindModeState(bool state)
+        {
+            _bindModeState = state;
+        }
+
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SharpDX.XInput;
 
 namespace XInput
 {
@@ -18,11 +19,28 @@ namespace XInput
 
         public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
-            if (!_devices.ContainsKey(subReq.DeviceDescriptor.DeviceInstance))
-            {
-                _devices.Add(subReq.DeviceDescriptor.DeviceInstance, new XiDevice(subReq.DeviceDescriptor));
-            }
+            CreateDevice(subReq.DeviceDescriptor);
             return _devices[subReq.DeviceDescriptor.DeviceInstance].SubscribeInput(subReq, observer);
+        }
+
+        public void SetBindModeState(DeviceDescriptor deviceDescriptor, bool state)
+        {
+            CreateDevice(deviceDescriptor);
+            _devices[deviceDescriptor.DeviceInstance].SetBindModeState(state);
+        }
+
+        private void CreateDevice(DeviceDescriptor deviceDescriptor)
+        {
+            if (!_devices.ContainsKey(deviceDescriptor.DeviceInstance))
+            {
+                _devices.Add(deviceDescriptor.DeviceInstance, new XiDevice(deviceDescriptor));
+            }
+        }
+
+        public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputModeReport> observer)
+        {
+            CreateDevice(deviceDescriptor);
+            return _devices[deviceDescriptor.DeviceInstance].Subscribe(observer);
         }
     }
 }
