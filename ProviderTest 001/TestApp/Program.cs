@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Common;
 using DirectInput;
+using XInput;
 
 namespace TestApp
 {
@@ -12,7 +13,8 @@ namespace TestApp
     {
         static void Main(string[] args)
         {
-            var di = new DirectInput.DiProvider();
+            var di = new DiProvider();
+            var xi = new XiProvider();
 
             var axis1 = new BindingDescriptor(BindingType.Axis, 0);
             var axis2 = new BindingDescriptor(BindingType.Axis, 1);
@@ -33,6 +35,8 @@ namespace TestApp
             var diT16K = new DeviceDescriptor("VID_044F&PID_B10A");
             var xbox1 = new DeviceDescriptor("Xbox");
 
+            xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
+
             //di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
             //di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
             //di.SubscribeInput(new InputDescriptor(divJoy, button128), new TestObserver("DI vJoy Button 128"));
@@ -41,8 +45,8 @@ namespace TestApp
             //di.SubscribeInput(new InputDescriptor(divJoy, pov2Down), new TestObserver("DI vJoy POV 2 Down"));
             //di.SubscribeInput(new InputDescriptor(divJoy, pov2Left), new TestObserver("DI vJoy POV 2 Left"));
 
-            di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode:"));
-            di.SetBindModeState(divJoy, true);
+            //di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode:"));
+            //di.SetBindModeState(divJoy, true);
 
             //di.SubscribeInput(new InputDescriptor(diT16K, button1), new TestObserver("DI T16k Button 1"));
             //di.SubscribeInput(new InputDescriptor(diT16K, axis1), new TestObserver("DI T16k Axis X"));
