@@ -11,7 +11,6 @@ namespace DirectInput
     {
         private readonly Dictionary<DeviceDescriptor, DiDevice> _devices = new Dictionary<DeviceDescriptor, DiDevice>();
 
-        // ToDo: Add support for device instances
         public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
             if (!DiWrapper.Instance.ConnectedDevices.ContainsKey(subReq.DeviceDescriptor.DeviceHandle))
