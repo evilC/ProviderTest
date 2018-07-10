@@ -37,16 +37,13 @@ namespace DirectInput
             for (var i = 0; i < 128; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
-                var proc = new DiButtonProcessor(descriptor);
-                proc.OnBindMode += OnBindMode;
-                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = proc;
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiButtonProcessor(descriptor, OnBindMode);
             }
 
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, i));
-                var proc = new DiPovProcessor(descriptor, OnBindMode);
-                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = proc;
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiPovProcessor(descriptor, OnBindMode);
             }
         }
 

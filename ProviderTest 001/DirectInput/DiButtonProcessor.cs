@@ -15,9 +15,10 @@ namespace DirectInput
         private readonly InputDescriptor _inputDescriptor;
         private readonly List<IObserver<InputModeReport>> _observers = new List<IObserver<InputModeReport>>();
 
-        public DiButtonProcessor(InputDescriptor inputDescriptor)
+        public DiButtonProcessor(InputDescriptor inputDescriptor, EventHandler<InputReportEventArgs> bindModeHandler)
         {
             _inputDescriptor = inputDescriptor;
+            OnBindMode += bindModeHandler;
         }
 
         public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer)
