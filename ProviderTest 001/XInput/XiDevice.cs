@@ -43,6 +43,14 @@ namespace XInput
                     _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
                 }
 
+                for (var i = 0; i < 4; i++)
+                {
+                    var buttonTuple = BuildTuple(BindingType.POV, 0, i);
+                    if (_pollProcessors[buttonTuple].GetObserverCount() == 0) continue;
+
+                    _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
+                }
+
                 Thread.Sleep(10);
             }
         }
@@ -55,16 +63,23 @@ namespace XInput
 
         private void BuildPollProcessors()
         {
-            for (var i = 0; i < 14; i++)
+            for (var i = 0; i < 10; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
+                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, OnBindMode);
+            }
+
+            for (var i = 0; i < 4; i++)
+            {
+                var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, 0, i));
                 _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, OnBindMode);
             }
         }
 
         public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
-            return _pollProcessors[subReq.BindingDescriptor.ToTuple()].Subscribe(subReq, observer);
+            var tuple = subReq.BindingDescriptor.ToTuple();
+            return _pollProcessors[tuple].Subscribe(subReq, observer);
         }
 
         private void OnBindMode(object sender, InputReportEventArgs inputReportEventArgs)

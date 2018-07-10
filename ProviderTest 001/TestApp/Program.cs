@@ -36,6 +36,7 @@ namespace TestApp
             var xbox1 = new DeviceDescriptor("Xbox");
 
             xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
+            xi.SubscribeInput(new InputDescriptor(xbox1, pov1Down), new TestObserver("XBox Pad 1 Dpad Down"));
 
             //di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
             //di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
