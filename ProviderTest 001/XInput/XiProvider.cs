@@ -10,7 +10,7 @@ namespace XInput
 {
     public class XiProvider
     {
-        private readonly Dictionary<int, XiDevice> _devices = new Dictionary<int, XiDevice>();
+        private readonly Dictionary<DeviceDescriptor, XiDevice> _devices = new Dictionary<DeviceDescriptor, XiDevice>();
 
         public XiProvider()
         {
@@ -20,27 +20,27 @@ namespace XInput
         public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
         {
             CreateDevice(subReq.DeviceDescriptor);
-            return _devices[subReq.DeviceDescriptor.DeviceInstance].SubscribeInput(subReq, observer);
+            return _devices[subReq.DeviceDescriptor].SubscribeInput(subReq, observer);
         }
 
         public void SetBindModeState(DeviceDescriptor deviceDescriptor, bool state)
         {
             CreateDevice(deviceDescriptor);
-            _devices[deviceDescriptor.DeviceInstance].SetBindModeState(state);
+            _devices[deviceDescriptor].SetBindModeState(state);
         }
 
         private void CreateDevice(DeviceDescriptor deviceDescriptor)
         {
-            if (!_devices.ContainsKey(deviceDescriptor.DeviceInstance))
+            if (!_devices.ContainsKey(deviceDescriptor))
             {
-                _devices.Add(deviceDescriptor.DeviceInstance, new XiDevice(deviceDescriptor));
+                _devices.Add(deviceDescriptor, new XiDevice(deviceDescriptor));
             }
         }
 
         public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputModeReport> observer)
         {
             CreateDevice(deviceDescriptor);
-            return _devices[deviceDescriptor.DeviceInstance].Subscribe(observer);
+            return _devices[deviceDescriptor].Subscribe(observer);
         }
     }
 }

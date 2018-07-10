@@ -9,7 +9,7 @@ namespace DirectInput
 {
     public class DiProvider
     {
-        private readonly Dictionary<string, DiDevice> _devices = new Dictionary<string, DiDevice>();
+        private readonly Dictionary<DeviceDescriptor, DiDevice> _devices = new Dictionary<DeviceDescriptor, DiDevice>();
 
         // ToDo: Add support for device instances
         public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
@@ -20,27 +20,27 @@ namespace DirectInput
             }
 
             CreateDevice(subReq.DeviceDescriptor);
-            return _devices[subReq.DeviceDescriptor.DeviceHandle].SubscribeInput(subReq, observer);
+            return _devices[subReq.DeviceDescriptor].SubscribeInput(subReq, observer);
         }
 
         public void CreateDevice(DeviceDescriptor deviceDescriptor)
         {
-            if (!_devices.ContainsKey(deviceDescriptor.DeviceHandle))
+            if (!_devices.ContainsKey(deviceDescriptor))
             {
-                _devices.Add(deviceDescriptor.DeviceHandle, new DiDevice(deviceDescriptor));
+                _devices.Add(deviceDescriptor, new DiDevice(deviceDescriptor));
             }
         }
 
         public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputModeReport> observer)
         {
             CreateDevice(deviceDescriptor);
-            return _devices[deviceDescriptor.DeviceHandle].Subscribe(observer);
+            return _devices[deviceDescriptor].Subscribe(observer);
         }
 
         public void SetBindModeState(DeviceDescriptor deviceDescriptor, bool state)
         {
             CreateDevice(deviceDescriptor);
-            _devices[deviceDescriptor.DeviceHandle].SetBindModeState(state);
+            _devices[deviceDescriptor].SetBindModeState(state);
         }
     }
 }
