@@ -47,27 +47,37 @@ namespace XInput
 
         public void ProcessSubscriptionMode(State thisState)
         {
-            var thisValue = GetValue(thisState);
-            if (thisValue == _lastValue) return;
-
-            var report = BuildReport(thisState);
-            foreach (var observer in _observers)
-            {
-                observer.OnNext(report);
-            }
-
-            _lastValue = thisValue;
+            ProcessPoll(PollMode.Subscription, thisState);
         }
 
         public void ProcessBindMode(State thisState)
         {
+            ProcessPoll(PollMode.Bind, thisState);
+        }
+
+        public void ProcessPoll(PollMode mode, State thisState)
+        {
             var thisValue = GetValue(thisState);
             if (thisValue == _lastValue) return;
-
             var report = BuildReport(thisState);
-            OnBindMode(this, new InputReportEventArgs(report));
+
+            switch (mode)
+            {
+                case PollMode.Bind:
+                    OnBindMode(this, new InputReportEventArgs(report));
+                    break;
+                case PollMode.Subscription:
+                    foreach (var observer in _observers)
+                    {
+                        observer.OnNext(report);
+                    }
+                    break;
+                default:
+                    throw new Exception($"Unknown Poll Mode: {mode}");
+            }
 
             _lastValue = thisValue;
+
         }
 
         private int GetValue(State thisState)
