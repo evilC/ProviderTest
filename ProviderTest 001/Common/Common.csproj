@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Common.cs" />
     <Compile Include="Descriptors.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="ObservableUnsubscriber.cs" />
     <Compile Include="PovHelper.cs" />
