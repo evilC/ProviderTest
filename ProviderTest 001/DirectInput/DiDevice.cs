@@ -15,7 +15,7 @@ namespace DirectInput
         private readonly DeviceDescriptor _deviceDescriptor;
         private readonly Dictionary<(BindingType, int), IPollProcessor<JoystickUpdate>> _pollProcessors = new Dictionary<(BindingType, int), IPollProcessor<JoystickUpdate>>();
         private readonly List<IObserver<InputModeReport>> _bindModeObservers = new List<IObserver<InputModeReport>>();
-        private bool _bindModeState;
+        private PollMode _pollMode = PollMode.Subscription;
 
         public DiDevice(DeviceDescriptor deviceDescriptor)
         {
@@ -59,7 +59,7 @@ namespace DirectInput
         {
             while (true)
             {
-                while (_bindModeState)
+                while (_pollMode == PollMode.Bind)
                 {
                     var data = _device.GetBufferedData();
                     foreach (var state in data)
@@ -72,7 +72,7 @@ namespace DirectInput
                     Thread.Sleep(10);
                 }
 
-                while (!_bindModeState)
+                while (_pollMode == PollMode.Subscription)
                 {
                     var data = _device.GetBufferedData();
                     foreach (var state in data)
@@ -111,7 +111,7 @@ namespace DirectInput
 
         public void SetBindModeState(bool state)
         {
-            _bindModeState = state;
+            _pollMode = state ? PollMode.Bind : PollMode.Subscription;
         }
     }
 }

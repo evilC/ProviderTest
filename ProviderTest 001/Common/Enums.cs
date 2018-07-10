@@ -12,4 +12,11 @@ namespace Common
         Button,
         POV
     }
+
+    public enum PollMode
+    {
+        Subscription,
+        Bind
+    }
+
 }

@@ -14,7 +14,8 @@ namespace XInput
         private readonly Dictionary<(BindingType, int, int), IPollProcessor<State>> _pollProcessors = new Dictionary<(BindingType, int, int), IPollProcessor<State>>();
         private readonly DeviceDescriptor _deviceDescriptor;
         private readonly List<IObserver<InputModeReport>> _bindModeObservers = new List<IObserver<InputModeReport>>();
-        private bool _bindModeState;
+
+        private PollMode _pollMode = PollMode.Subscription;
 
         private readonly Controller _device;
 
@@ -33,7 +34,7 @@ namespace XInput
         {
             while (true)
             {
-                while (_bindModeState)
+                while (_pollMode == PollMode.Bind)
                 {
                     var thisState = _device.GetState();
 
@@ -56,7 +57,7 @@ namespace XInput
                     Thread.Sleep(10);
                 }
 
-                while (!_bindModeState)
+                while (_pollMode == PollMode.Subscription)
                 {
                     var thisState = _device.GetState();
 
@@ -127,7 +128,7 @@ namespace XInput
 
         public void SetBindModeState(bool state)
         {
-            _bindModeState = state;
+            _pollMode = state ? PollMode.Bind : PollMode.Subscription;
         }
 
     }
