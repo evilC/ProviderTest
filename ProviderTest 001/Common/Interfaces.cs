@@ -32,4 +32,15 @@ namespace Common
     {
         int GetObserverCount();
     }
+
+    public class InputReportEventArgs : EventArgs
+    {
+        public InputModeReport InputModeReport { get; }
+
+        public InputReportEventArgs(InputModeReport inputModeReport)
+        {
+            InputModeReport = inputModeReport;
+        }
+    }
+
 }
