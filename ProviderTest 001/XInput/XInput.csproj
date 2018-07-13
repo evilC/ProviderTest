@@ -47,7 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="XiButtonProcessor.cs" />
+    <Compile Include="PollProcessors\XiButtonProcessor.cs" />
     <Compile Include="XiDevice.cs" />
     <Compile Include="XiProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

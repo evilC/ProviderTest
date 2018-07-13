@@ -43,6 +43,7 @@ namespace TestApp
             var diS1 = di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
             di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
             di.SubscribeInput(new InputDescriptor(divJoy, button128), new TestObserver("DI vJoy Button 128"));
+            di.SubscribeInput(new InputDescriptor(divJoy, axis1), new TestObserver("DI vJoy Axis X"));
             di.SubscribeInput(new InputDescriptor(divJoy, pov1Down), new TestObserver("DI vJoy POV 1 Down"));
             di.SubscribeInput(new InputDescriptor(divJoy, pov1Left), new TestObserver("DI vJoy POV 1 Left"));
             di.SubscribeInput(new InputDescriptor(divJoy, pov2Down), new TestObserver("DI vJoy POV 2 Down"));

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using SharpDX.XInput;
+using XInput.PollProcessors;
 
 namespace XInput
 {

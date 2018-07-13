@@ -38,12 +38,21 @@ namespace DirectInput
         public void BuildPollProcessors()
         {
             // ToDo: Read Device Caps
+            // Axes
+            for (var i = 0; i < 8; i++)
+            {
+                var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.Axis, i));
+                PollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new DiAxisProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
+            }
+
+            // Buttons
             for (var i = 0; i < 128; i++)
             {
                 var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.Button, i));
                 PollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new DiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
 
+            // POVs
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.POV, i));
