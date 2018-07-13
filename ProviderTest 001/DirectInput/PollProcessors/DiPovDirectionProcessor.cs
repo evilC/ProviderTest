@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Common;
 using SharpDX.DirectInput;
 
@@ -44,7 +45,7 @@ namespace DirectInput.PollProcessors
             {
                 foreach (var observer in _observers)
                 {
-                    observer.OnNext(new InputReport(_inputDescriptor, newDirectionState));
+                    ThreadPool.QueueUserWorkItem(threadProc => observer.OnNext(new InputReport(_inputDescriptor, newDirectionState)));
                 }
                 _lastState = newDirectionState;
             }

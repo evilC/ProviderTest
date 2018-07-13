@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Common;
 using SharpDX.DirectInput;
@@ -38,7 +39,7 @@ namespace DirectInput.PollProcessors
             var report = BuildReport(state);
             foreach (var observer in _observers)
             {
-                observer.OnNext(report);
+                ThreadPool.QueueUserWorkItem(threadProc => observer.OnNext(report));
             }
         }
 

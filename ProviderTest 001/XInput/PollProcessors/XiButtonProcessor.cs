@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Common;
 using SharpDX.XInput;
 
@@ -68,7 +69,7 @@ namespace XInput.PollProcessors
                 case PollMode.Subscription:
                     foreach (var observer in _observers)
                     {
-                        observer.OnNext(report);
+                        ThreadPool.QueueUserWorkItem(threadProc => observer.OnNext(report));
                     }
                     break;
                 default:
