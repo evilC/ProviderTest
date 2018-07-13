@@ -9,7 +9,7 @@ using SharpDX.DirectInput;
 
 namespace DirectInput
 {
-    class DiDevice : InputDevice<JoystickUpdate, (BindingType, int)>
+    public class DiDevice : InputDevice<JoystickUpdate, (BindingType, int)>
     {
         private readonly Joystick _device;
         private readonly Thread _pollThread;

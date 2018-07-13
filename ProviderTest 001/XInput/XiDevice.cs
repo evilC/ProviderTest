@@ -9,7 +9,7 @@ using SharpDX.XInput;
 
 namespace XInput
 {
-    class XiDevice : InputDevice<State, (BindingType, int, int)>
+    public class XiDevice : InputDevice<State, (BindingType, int, int)>
     {
         private readonly Thread _pollThread;
 

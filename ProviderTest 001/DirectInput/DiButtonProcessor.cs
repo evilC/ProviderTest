@@ -8,7 +8,7 @@ using SharpDX.DirectInput;
 
 namespace DirectInput
 {
-    class DiButtonProcessor : IPollProcessor<JoystickUpdate>, IObservableInput<InputReport>
+    public class DiButtonProcessor : IPollProcessor<JoystickUpdate>, IObservableInput<InputReport>
     {
         public EventHandler<InputReportEventArgs> OnBindMode;
         private readonly EventHandler _observerListEmptyEventHandler;

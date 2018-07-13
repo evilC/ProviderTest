@@ -5,7 +5,7 @@ using SharpDX.DirectInput;
 
 namespace DirectInput
 {
-    class DiPovDirectionProcessor :IPollProcessor<JoystickUpdate>, IObservableInput<InputReport>
+    public class DiPovDirectionProcessor :IPollProcessor<JoystickUpdate>, IObservableInput<InputReport>
     {
         private readonly InputDescriptor _inputDescriptor;
         private readonly int _thisAngle;

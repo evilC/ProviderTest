@@ -8,7 +8,7 @@ using SharpDX.DirectInput;
 
 namespace DirectInput
 {
-    class DiPovProcessor : IPollProcessor<JoystickUpdate>
+    public class DiPovProcessor : IPollProcessor<JoystickUpdate>
     {
         private readonly List<DiPovDirectionProcessor> _directionProcessors = new List<DiPovDirectionProcessor>();
         private readonly EventHandler _observerListEmptyEventHandler;
