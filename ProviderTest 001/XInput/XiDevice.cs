@@ -64,6 +64,8 @@ namespace XInput
                     for (var i = 0; i < 6; i++)
                     {
                         var axisTuple = (BindingType.Axis, i, 0);
+                        if (PollProcessors[axisTuple].GetObserverCount() == 0) continue;
+
                         PollProcessors[axisTuple].ProcessSubscriptionMode(thisState);
                     }
 
