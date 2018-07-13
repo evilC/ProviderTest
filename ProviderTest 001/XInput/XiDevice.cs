@@ -9,25 +9,15 @@ using SharpDX.XInput;
 
 namespace XInput
 {
-    class XiDevice : IObservable<InputModeReport>, IDevice
+    class XiDevice : InputDevice<State, (BindingType, int, int)>
     {
-        private readonly Dictionary<(BindingType, int, int), IPollProcessor<State>> _pollProcessors = new Dictionary<(BindingType, int, int), IPollProcessor<State>>();
-        private readonly DeviceDescriptor _deviceDescriptor;
-        private readonly List<IObserver<InputModeReport>> _bindModeObservers = new List<IObserver<InputModeReport>>();
-
-        private PollMode _pollMode = PollMode.Subscription;
         private readonly Thread _pollThread;
-        public EventHandler<DeviceEmptyEventArgs> OnDeviceEmpty;
 
         private readonly Controller _device;
 
-        public XiDevice(DeviceDescriptor deviceDescriptor, EventHandler<DeviceEmptyEventArgs> deviceEmptyEventHandler)
+        public XiDevice(DeviceDescriptor deviceDescriptor, EventHandler<DeviceEmptyEventArgs> deviceEmptyEventHandler) : base(deviceDescriptor, deviceEmptyEventHandler)
         {
-            OnDeviceEmpty = deviceEmptyEventHandler;
             _device = new Controller((UserIndex)deviceDescriptor.DeviceInstance);
-
-            BuildPollProcessors();
-            _deviceDescriptor = deviceDescriptor;
 
             _pollThread = new Thread(PollThread);
             _pollThread.Start();
@@ -44,7 +34,7 @@ namespace XInput
                     // Buttons
                     for (var i = 0; i < 10; i++)
                     {
-                        var buttonTuple = BuildTuple(BindingType.Button, i);
+                        var buttonTuple = (BindingType.Button, i, 0);
 
                         _pollProcessors[buttonTuple].ProcessBindMode(thisState);
                     }
@@ -52,7 +42,7 @@ namespace XInput
                     // DPad
                     for (var i = 0; i < 4; i++)
                     {
-                        var buttonTuple = BuildTuple(BindingType.POV, 0, i);
+                        var buttonTuple = (BindingType.POV, 0, i);
 
                         _pollProcessors[buttonTuple].ProcessBindMode(thisState);
                     }
@@ -67,7 +57,7 @@ namespace XInput
                     // Buttons
                     for (var i = 0; i < 10; i++)
                     {
-                        var buttonTuple = BuildTuple(BindingType.Button, i);
+                        var buttonTuple = (BindingType.Button, i, 0);
                         if (_pollProcessors[buttonTuple].GetObserverCount() == 0) continue;
 
                         _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
@@ -76,7 +66,7 @@ namespace XInput
                     // DPad
                     for (var i = 0; i < 4; i++)
                     {
-                        var buttonTuple = BuildTuple(BindingType.POV, 0, i);
+                        var buttonTuple = (BindingType.POV, 0, i);
                         if (_pollProcessors[buttonTuple].GetObserverCount() == 0) continue;
 
                         _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
@@ -87,86 +77,27 @@ namespace XInput
             }
         }
 
-        public (BindingType, int, int) BuildTuple(BindingType bindingType, int index, int subIndex = 0)
+        public override (BindingType, int, int) GetPollProcessorKey(BindingDescriptor bindingDescriptor)
         {
-            return (bindingType, index, subIndex);
+            return (bindingDescriptor.Type, bindingDescriptor.Index, bindingDescriptor.SubIndex);
         }
 
-
-        private void BuildPollProcessors()
+        public override void BuildPollProcessors()
         {
             for (var i = 0; i < 10; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
+                _pollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
 
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, 0, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
+                _pollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
         }
 
-        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
-        {
-            var tuple = subReq.BindingDescriptor.ToTuple();
-            return _pollProcessors[tuple].Subscribe(subReq, observer);
-        }
-
-        private void BindModeEventHandler(object sender, InputReportEventArgs inputReportEventArgs)
-        {
-            foreach (var bindModeObserver in _bindModeObservers)
-            {
-                bindModeObserver.OnNext(inputReportEventArgs.InputModeReport);
-            }
-        }
-
-        // Bind Mode subscribe
-        public IDisposable Subscribe(IObserver<InputModeReport> observer)
-        {
-            _bindModeObservers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer, BindModeEmptyEventHandler);
-        }
-
-        private void InputEmptyEventHandler(object sender, EventArgs eventArgs)
-        {
-            if (_bindModeObservers.Count > 0) return;
-            var empty = true;
-            foreach (var pollProcessor in _pollProcessors.Values)
-            {
-                if (pollProcessor.GetObserverCount() == 0) continue;
-                empty = false;
-                break;
-            }
-            if (!empty) return;
-
-            OnDeviceEmpty(this, new DeviceEmptyEventArgs(_deviceDescriptor));
-        }
-
-        private void BindModeEmptyEventHandler(object sender, EventArgs eventArgs)
-        {
-            throw new NotImplementedException();
-        }
-
-        private bool DeviceHasSubscriptionObservers()
-        {
-            foreach (var pollProcessor in _pollProcessors.Values)
-            {
-                if (pollProcessor.GetObserverCount() == 0) continue;
-                return true;
-            }
-
-            return false;
-        }
-
-
-        public void SetBindModeState(bool state)
-        {
-            _pollMode = state ? PollMode.Bind : PollMode.Subscription;
-        }
-
-        public void Dispose()
+        public override void Dispose()
         {
             _pollThread.Abort();
             _pollThread.Join();

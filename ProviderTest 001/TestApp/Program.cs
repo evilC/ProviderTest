@@ -43,14 +43,14 @@ namespace TestApp
             var xbm = di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode: "));
 
             var b1 = di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
-            b1.Dispose();
-            xbm.Dispose();
-            //di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
-            //di.SubscribeInput(new InputDescriptor(divJoy, button128), new TestObserver("DI vJoy Button 128"));
-            //di.SubscribeInput(new InputDescriptor(divJoy, pov1Down), new TestObserver("DI vJoy POV 1 Down"));
-            //di.SubscribeInput(new InputDescriptor(divJoy, pov1Left), new TestObserver("DI vJoy POV 1 Left"));
-            //di.SubscribeInput(new InputDescriptor(divJoy, pov2Down), new TestObserver("DI vJoy POV 2 Down"));
-            //di.SubscribeInput(new InputDescriptor(divJoy, pov2Left), new TestObserver("DI vJoy POV 2 Left"));
+            //b1.Dispose();
+            //xbm.Dispose();
+            di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
+            di.SubscribeInput(new InputDescriptor(divJoy, button128), new TestObserver("DI vJoy Button 128"));
+            di.SubscribeInput(new InputDescriptor(divJoy, pov1Down), new TestObserver("DI vJoy POV 1 Down"));
+            di.SubscribeInput(new InputDescriptor(divJoy, pov1Left), new TestObserver("DI vJoy POV 1 Left"));
+            di.SubscribeInput(new InputDescriptor(divJoy, pov2Down), new TestObserver("DI vJoy POV 2 Down"));
+            di.SubscribeInput(new InputDescriptor(divJoy, pov2Left), new TestObserver("DI vJoy POV 2 Left"));
 
             //di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode:"));
             //di.SetBindModeState(divJoy, true);

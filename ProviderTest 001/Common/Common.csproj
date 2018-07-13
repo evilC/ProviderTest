@@ -45,6 +45,7 @@
     <Compile Include="Descriptors.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="EventArgs.cs" />
+    <Compile Include="InputDevice.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="ObservableUnsubscriber.cs" />
     <Compile Include="PovHelper.cs" />

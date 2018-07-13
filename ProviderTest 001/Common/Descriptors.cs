@@ -50,16 +50,6 @@ namespace Common
         /// </summary>
         public int SubIndex { get; }
 
-        public (BindingType, int, int) ToTuple()
-        {
-            return (Type, Index, SubIndex);
-        }
-
-        public (BindingType, int) ToShortTuple()
-        {
-            return (Type, Index);
-        }
-
         public override string ToString()
         {
             return $"Type: {Type}, Index: {Index}, SubIndex: {SubIndex}";
