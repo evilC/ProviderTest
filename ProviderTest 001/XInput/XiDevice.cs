@@ -33,12 +33,17 @@ namespace XInput
                 while (PollMode == PollMode.Bind)
                 {
                     var thisState = _device.GetState();
+                    // Axes
+                    for (var i = 0; i < 6; i++)
+                    {
+                        var axisTuple = (BindingType.Axis, i, 0);
+                        PollProcessors[axisTuple].ProcessBindMode(thisState);
+                    }
 
                     // Buttons
                     for (var i = 0; i < 10; i++)
                     {
                         var buttonTuple = (BindingType.Button, i, 0);
-
                         PollProcessors[buttonTuple].ProcessBindMode(thisState);
                     }
 
@@ -46,7 +51,6 @@ namespace XInput
                     for (var i = 0; i < 4; i++)
                     {
                         var buttonTuple = (BindingType.POV, 0, i);
-
                         PollProcessors[buttonTuple].ProcessBindMode(thisState);
                     }
 
@@ -56,6 +60,12 @@ namespace XInput
                 while (PollMode == PollMode.Subscription)
                 {
                     var thisState = _device.GetState();
+                    // Axes
+                    for (var i = 0; i < 6; i++)
+                    {
+                        var axisTuple = (BindingType.Axis, i, 0);
+                        PollProcessors[axisTuple].ProcessSubscriptionMode(thisState);
+                    }
 
                     // Buttons
                     for (var i = 0; i < 10; i++)
@@ -87,12 +97,21 @@ namespace XInput
 
         public void BuildPollProcessors()
         {
+            // Axes
+            for (var i = 0; i < 6; i++)
+            {
+                var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.Axis, i));
+                PollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new XiAxisProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
+            }
+
+            // Buttons
             for (var i = 0; i < 10; i++)
             {
                 var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.Button, i));
                 PollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
 
+            // DPad DIRECTIONS (Handled as buttons)
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.POV, 0, i));
