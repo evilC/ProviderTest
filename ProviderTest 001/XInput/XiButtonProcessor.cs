@@ -8,7 +8,7 @@ using SharpDX.XInput;
 
 namespace XInput
 {
-    class XiButtonProcessor : IPollProcessor<State>, IObservableInput<InputReport>
+    public class XiButtonProcessor : IPollProcessor<State>, IObservableInput<InputReport>
     {
         public EventHandler<InputReportEventArgs> OnBindMode;
         private readonly EventHandler _observerListEmptyEventHandler;
