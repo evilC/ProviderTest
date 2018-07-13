@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Common;
+using DirectInput.PollProcessors;
 using SharpDX.DirectInput;
 
 namespace DirectInput

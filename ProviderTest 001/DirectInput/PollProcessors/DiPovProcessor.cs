@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common;
 using SharpDX.DirectInput;
 
-namespace DirectInput
+namespace DirectInput.PollProcessors
 {
     public class DiPovProcessor : IPollProcessor<JoystickUpdate>
     {

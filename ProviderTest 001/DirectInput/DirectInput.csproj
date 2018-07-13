@@ -47,10 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DiButtonProcessor.cs" />
+    <Compile Include="PollProcessors\DiButtonProcessor.cs" />
     <Compile Include="DiDevice.cs" />
-    <Compile Include="DiPovDirectionProcessor.cs" />
-    <Compile Include="DiPovProcessor.cs" />
+    <Compile Include="PollProcessors\DiPovDirectionProcessor.cs" />
+    <Compile Include="PollProcessors\DiPovProcessor.cs" />
     <Compile Include="DiProvider.cs" />
     <Compile Include="DiWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

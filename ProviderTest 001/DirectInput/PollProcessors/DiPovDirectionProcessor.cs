@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Common;
 using SharpDX.DirectInput;
 
-namespace DirectInput
+namespace DirectInput.PollProcessors
 {
     public class DiPovDirectionProcessor :IPollProcessor<JoystickUpdate>, IObservableInput<InputReport>
     {
