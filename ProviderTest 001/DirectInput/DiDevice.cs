@@ -27,25 +27,12 @@ namespace DirectInput
             _pollThread.Start();
         }
 
-        #region Interfaces
-
-        #region IObservable
-
-        #endregion
-
-        #region IDisposable
-
         public override void Dispose()
         {
             _pollThread.Abort();
             _pollThread.Join();
             _device?.Dispose();
         }
-
-        #endregion
-
-        #endregion
-
 
         public void BuildPollProcessors()
         {
@@ -101,8 +88,9 @@ namespace DirectInput
         {
             if (offset > JoystickOffset.Buttons127) throw new NotImplementedException(); // force etc not implemented
             if (offset >= JoystickOffset.Buttons0) return (BindingType.Button, offset - JoystickOffset.Buttons0);
-            if (offset >= JoystickOffset.PointOfViewControllers0) return (BindingType.POV, (offset - JoystickOffset.PointOfViewControllers0) / 4);
-            return (BindingType.Axis, (int)offset / 4);
+            return offset >= JoystickOffset.PointOfViewControllers0
+                ? (BindingType.POV, (offset - JoystickOffset.PointOfViewControllers0) / 4) 
+                : (BindingType.Axis, (int)offset / 4);
         }
 
         public override (BindingType, int) GetPollProcessorKey(BindingDescriptor bindingDescriptor)
