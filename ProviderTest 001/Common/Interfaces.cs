@@ -13,7 +13,7 @@ namespace Common
     /// </summary>
     public interface IPollProcessor<TPollType> : IObservableBase
     {
-        IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer);
+        IDisposable Subscribe(InputDescriptor subReq, IObserver<InputReport> observer);
         void ProcessSubscriptionMode(TPollType state);
         void ProcessBindMode(TPollType state);
     }
@@ -42,14 +42,14 @@ namespace Common
         /// <param name="subReq">The descriptor that describes the device and input</param>
         /// <param name="observer">The observer that will handle input reports from the specified input</param>
         /// <returns></returns>
-        IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer);
+        IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputReport> observer);
 
         /// <summary>
         /// Adds an observer for Bind Mode
         /// </summary>
         /// <param name="observer">The observer that will handle input reports while in Bind Mode</param>
         /// <returns></returns>
-        IDisposable Subscribe(IObserver<InputModeReport> observer);
+        IDisposable Subscribe(IObserver<InputReport> observer);
     }
 
     public interface IObservableBase

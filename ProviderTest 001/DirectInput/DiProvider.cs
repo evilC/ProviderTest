@@ -11,7 +11,7 @@ namespace DirectInput
     {
         private readonly Dictionary<DeviceDescriptor, DiDevice> _devices = new Dictionary<DeviceDescriptor, DiDevice>();
 
-        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
+        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputReport> observer)
         {
             if (!DiWrapper.Instance.ConnectedDevices.ContainsKey(subReq.DeviceDescriptor.DeviceHandle))
             {
@@ -36,7 +36,7 @@ namespace DirectInput
             _devices.Remove(deviceEmptyEventArgs.DeviceDescriptor);
         }
 
-        public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputModeReport> observer)
+        public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputReport> observer)
         {
             CreateDevice(deviceDescriptor);
             return _devices[deviceDescriptor].Subscribe(observer);

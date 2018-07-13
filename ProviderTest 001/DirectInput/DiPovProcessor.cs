@@ -23,7 +23,7 @@ namespace DirectInput
             }
         }
 
-        public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer)
+        public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputReport> observer)
         {
             return _directionProcessors[subReq.BindingDescriptor.SubIndex].Subscribe(subReq, observer);
         }

@@ -8,13 +8,13 @@ using SharpDX.DirectInput;
 
 namespace DirectInput
 {
-    class DiButtonProcessor : IPollProcessor<JoystickUpdate>, IObservableInput<InputModeReport>
+    class DiButtonProcessor : IPollProcessor<JoystickUpdate>, IObservableInput<InputReport>
     {
         public EventHandler<InputReportEventArgs> OnBindMode;
         private readonly EventHandler _observerListEmptyEventHandler;
 
         private readonly InputDescriptor _inputDescriptor;
-        private readonly List<IObserver<InputModeReport>> _observers = new List<IObserver<InputModeReport>>();
+        private readonly List<IObserver<InputReport>> _observers = new List<IObserver<InputReport>>();
 
         public DiButtonProcessor(InputDescriptor inputDescriptor, EventHandler observerListEmptyEventHandler , EventHandler<InputReportEventArgs> bindModeHandler)
         {
@@ -23,7 +23,7 @@ namespace DirectInput
             OnBindMode += bindModeHandler;
         }
 
-        public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer)
+        public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputReport> observer)
         {
             return Subscribe(observer);
         }
@@ -43,15 +43,15 @@ namespace DirectInput
             OnBindMode(this, new InputReportEventArgs(report));
         }
 
-        private InputModeReport BuildReport(JoystickUpdate state)
+        private InputReport BuildReport(JoystickUpdate state)
         {
-            return new InputModeReport(_inputDescriptor, state.Value == 128 ? 1 : 0);
+            return new InputReport(_inputDescriptor, state.Value == 128 ? 1 : 0);
         }
 
-        public IDisposable Subscribe(IObserver<InputModeReport> observer)
+        public IDisposable Subscribe(IObserver<InputReport> observer)
         {
             _observers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_observers, observer, _observerListEmptyEventHandler);
+            return new ObservableUnsubscriber<InputReport>(_observers, observer, _observerListEmptyEventHandler);
         }
 
         public int GetObserverCount()

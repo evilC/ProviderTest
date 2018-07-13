@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Common
 {
-    public abstract class InputDevice<TPollType, TPollProcessorKey> : IDevice, IObservable<InputModeReport>
+    public abstract class InputDevice<TPollType, TPollProcessorKey> : IDevice, IObservable<InputReport>
     {
         // What happens when we poll? Fire Subscriptions for just subscribed inputs, or send all input to the Bind Mode handler?
         protected PollMode PollMode = PollMode.Subscription;
@@ -18,7 +18,7 @@ namespace Common
         protected readonly Dictionary<TPollProcessorKey, IPollProcessor<TPollType>> PollProcessors = new Dictionary<TPollProcessorKey, IPollProcessor<TPollType>>();
 
         // List of observers for Bind Mode
-        protected readonly List<IObserver<InputModeReport>> BindModeObservers = new List<IObserver<InputModeReport>>();
+        protected readonly List<IObserver<InputReport>> BindModeObservers = new List<IObserver<InputReport>>();
 
         // Fired when the device has no subscriptions
         public EventHandler<DeviceEmptyEventArgs> OnDeviceEmpty;
@@ -43,15 +43,15 @@ namespace Common
             PollMode = state ? PollMode.Bind : PollMode.Subscription;
         }
 
-        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
+        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputReport> observer)
         {
             return PollProcessors[GetPollProcessorKey(subReq.BindingDescriptor)].Subscribe(subReq, observer);
         }
 
-        public IDisposable Subscribe(IObserver<InputModeReport> observer)
+        public IDisposable Subscribe(IObserver<InputReport> observer)
         {
             BindModeObservers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(BindModeObservers, observer, BindModeEmptyEventHandler);
+            return new ObservableUnsubscriber<InputReport>(BindModeObservers, observer, BindModeEmptyEventHandler);
         }
 
         #endregion
@@ -99,7 +99,7 @@ namespace Common
         {
             foreach (var bindModeObserver in BindModeObservers)
             {
-                bindModeObserver.OnNext(inputReportEventArgs.InputModeReport);
+                bindModeObserver.OnNext(inputReportEventArgs.InputReport);
             }
         }
 

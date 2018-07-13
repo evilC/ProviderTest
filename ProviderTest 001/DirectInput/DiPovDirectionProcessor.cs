@@ -5,12 +5,12 @@ using SharpDX.DirectInput;
 
 namespace DirectInput
 {
-    class DiPovDirectionProcessor :IPollProcessor<JoystickUpdate>, IObservableInput<InputModeReport>
+    class DiPovDirectionProcessor :IPollProcessor<JoystickUpdate>, IObservableInput<InputReport>
     {
         private readonly InputDescriptor _inputDescriptor;
         private readonly int _thisAngle;
         private int _lastState;
-        private readonly List<IObserver<InputModeReport>> _observers = new List<IObserver<InputModeReport>>();
+        private readonly List<IObserver<InputReport>> _observers = new List<IObserver<InputReport>>();
         public EventHandler<InputReportEventArgs> OnBindMode;
         private readonly EventHandler _observerListEmptyEventHandler;
 
@@ -22,13 +22,13 @@ namespace DirectInput
             OnBindMode += bindModeHandler;
         }
 
-        public IDisposable Subscribe(IObserver<InputModeReport> observer)
+        public IDisposable Subscribe(IObserver<InputReport> observer)
         {
             _observers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_observers, observer, _observerListEmptyEventHandler);
+            return new ObservableUnsubscriber<InputReport>(_observers, observer, _observerListEmptyEventHandler);
         }
 
-        public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer)
+        public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputReport> observer)
         {
             return Subscribe(observer);
         }
@@ -44,7 +44,7 @@ namespace DirectInput
             {
                 foreach (var observer in _observers)
                 {
-                    observer.OnNext(new InputModeReport(_inputDescriptor, newDirectionState));
+                    observer.OnNext(new InputReport(_inputDescriptor, newDirectionState));
                 }
                 _lastState = newDirectionState;
             }
@@ -59,7 +59,7 @@ namespace DirectInput
                     : PovHelper.StateFromAngle(newAngle, _thisAngle);
             if (newDirectionState != _lastState)
             {
-                OnBindMode(this, new InputReportEventArgs(new InputModeReport(_inputDescriptor, newDirectionState)));
+                OnBindMode(this, new InputReportEventArgs(new InputReport(_inputDescriptor, newDirectionState)));
                 _lastState = newDirectionState;
             }
         }

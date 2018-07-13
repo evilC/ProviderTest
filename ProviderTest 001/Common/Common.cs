@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace Common
 {
-    public struct InputModeReport
+    public struct InputReport
     {
-        public InputModeReport(InputDescriptor inputDescriptor, int value)
+        public InputReport(InputDescriptor inputDescriptor, int value)
         {
             InputDescriptor = inputDescriptor;
             Value = value;

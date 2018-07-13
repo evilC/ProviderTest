@@ -8,11 +8,11 @@ namespace Common
 {
     public class InputReportEventArgs : EventArgs
     {
-        public InputModeReport InputModeReport { get; }
+        public InputReport InputReport { get; }
 
-        public InputReportEventArgs(InputModeReport inputModeReport)
+        public InputReportEventArgs(InputReport inputReport)
         {
-            InputModeReport = inputModeReport;
+            InputReport = inputReport;
         }
     }
 

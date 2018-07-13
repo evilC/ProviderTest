@@ -62,7 +62,7 @@ namespace TestApp
         }
     }
 
-    public class TestObserver : IObserver<InputModeReport>
+    public class TestObserver : IObserver<InputReport>
     {
         public string Name { get; }
 
@@ -71,7 +71,7 @@ namespace TestApp
             Name = name;
         }
 
-        public void OnNext(InputModeReport state)
+        public void OnNext(InputReport state)
         {
             Console.WriteLine($"[{Name}] State: {state.InputDescriptor.BindingDescriptor}, Value: {state.Value}");
         }
@@ -87,7 +87,7 @@ namespace TestApp
         }
     }
 
-    public class BindModeObserver : IObserver<InputModeReport>
+    public class BindModeObserver : IObserver<InputReport>
     {
         public string Name { get; }
 
@@ -96,7 +96,7 @@ namespace TestApp
             Name = name;
         }
 
-        public void OnNext(InputModeReport state)
+        public void OnNext(InputReport state)
         {
             Console.WriteLine($"[{Name}] State: {state.InputDescriptor.BindingDescriptor}, Value: {state.Value}");
         }

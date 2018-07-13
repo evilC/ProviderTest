@@ -17,7 +17,7 @@ namespace XInput
             
         }
 
-        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
+        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputReport> observer)
         {
             CreateDevice(subReq.DeviceDescriptor);
             return _devices[subReq.DeviceDescriptor].SubscribeInput(subReq, observer);
@@ -43,7 +43,7 @@ namespace XInput
             _devices.Remove(deviceEmptyEventArgs.DeviceDescriptor);
         }
 
-        public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputModeReport> observer)
+        public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputReport> observer)
         {
             CreateDevice(deviceDescriptor);
             return _devices[deviceDescriptor].Subscribe(observer);
