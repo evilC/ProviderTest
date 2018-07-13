@@ -30,7 +30,26 @@ namespace Common
 
     public interface IDevice : IDisposable
     {
+        /// <summary>
+        /// Switch to / from Bind Mode
+        /// </summary>
+        /// <param name="state">true = Bind Mode, false = Subscription Mode</param>
         void SetBindModeState(bool state);
+
+        /// <summary>
+        /// Adds an observer for Subscription Mode
+        /// </summary>
+        /// <param name="subReq">The descriptor that describes the device and input</param>
+        /// <param name="observer">The observer that will handle input reports from the specified input</param>
+        /// <returns></returns>
+        IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer);
+
+        /// <summary>
+        /// Adds an observer for Bind Mode
+        /// </summary>
+        /// <param name="observer">The observer that will handle input reports while in Bind Mode</param>
+        /// <returns></returns>
+        IDisposable Subscribe(IObserver<InputModeReport> observer);
     }
 
     public interface IObservableBase

@@ -19,6 +19,8 @@ namespace XInput
         {
             _device = new Controller((UserIndex)deviceDescriptor.DeviceInstance);
 
+            BuildPollProcessors();
+
             _pollThread = new Thread(PollThread);
             _pollThread.Start();
         }
@@ -27,7 +29,7 @@ namespace XInput
         {
             while (true)
             {
-                while (_pollMode == PollMode.Bind)
+                while (PollMode == PollMode.Bind)
                 {
                     var thisState = _device.GetState();
 
@@ -36,7 +38,7 @@ namespace XInput
                     {
                         var buttonTuple = (BindingType.Button, i, 0);
 
-                        _pollProcessors[buttonTuple].ProcessBindMode(thisState);
+                        PollProcessors[buttonTuple].ProcessBindMode(thisState);
                     }
 
                     // DPad
@@ -44,13 +46,13 @@ namespace XInput
                     {
                         var buttonTuple = (BindingType.POV, 0, i);
 
-                        _pollProcessors[buttonTuple].ProcessBindMode(thisState);
+                        PollProcessors[buttonTuple].ProcessBindMode(thisState);
                     }
 
                     Thread.Sleep(10);
                 }
 
-                while (_pollMode == PollMode.Subscription)
+                while (PollMode == PollMode.Subscription)
                 {
                     var thisState = _device.GetState();
 
@@ -58,18 +60,18 @@ namespace XInput
                     for (var i = 0; i < 10; i++)
                     {
                         var buttonTuple = (BindingType.Button, i, 0);
-                        if (_pollProcessors[buttonTuple].GetObserverCount() == 0) continue;
+                        if (PollProcessors[buttonTuple].GetObserverCount() == 0) continue;
 
-                        _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
+                        PollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
                     }
 
                     // DPad
                     for (var i = 0; i < 4; i++)
                     {
                         var buttonTuple = (BindingType.POV, 0, i);
-                        if (_pollProcessors[buttonTuple].GetObserverCount() == 0) continue;
+                        if (PollProcessors[buttonTuple].GetObserverCount() == 0) continue;
 
-                        _pollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
+                        PollProcessors[buttonTuple].ProcessSubscriptionMode(thisState);
                     }
 
                     Thread.Sleep(10);
@@ -82,18 +84,18 @@ namespace XInput
             return (bindingDescriptor.Type, bindingDescriptor.Index, bindingDescriptor.SubIndex);
         }
 
-        public override void BuildPollProcessors()
+        public void BuildPollProcessors()
         {
             for (var i = 0; i < 10; i++)
             {
-                var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
-                _pollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
+                var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.Button, i));
+                PollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
 
             for (var i = 0; i < 4; i++)
             {
-                var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, 0, i));
-                _pollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
+                var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.POV, 0, i));
+                PollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
         }
 

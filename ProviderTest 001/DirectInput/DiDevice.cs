@@ -21,6 +21,8 @@ namespace DirectInput
             _device.Properties.BufferSize = 128;
             _device.Acquire();
 
+            BuildPollProcessors();
+
             _pollThread = new Thread(PollThread);
             _pollThread.Start();
         }
@@ -45,19 +47,19 @@ namespace DirectInput
         #endregion
 
 
-        public override void BuildPollProcessors()
+        public void BuildPollProcessors()
         {
             // ToDo: Read Device Caps
             for (var i = 0; i < 128; i++)
             {
-                var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
-                _pollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new DiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
+                var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.Button, i));
+                PollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new DiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
 
             for (var i = 0; i < 4; i++)
             {
-                var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, i));
-                _pollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new DiPovProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
+                var descriptor = new InputDescriptor(DeviceDescriptor, new BindingDescriptor(BindingType.POV, i));
+                PollProcessors[GetPollProcessorKey(descriptor.BindingDescriptor)] = new DiPovProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
         }
 
@@ -65,30 +67,30 @@ namespace DirectInput
         {
             while (true)
             {
-                while (_pollMode == PollMode.Bind)
+                while (PollMode == PollMode.Bind)
                 {
                     var data = _device.GetBufferedData();
                     foreach (var state in data)
                     {
                         var processorTuple = GetPollProcessorKey(state.Offset);
-                        if (!_pollProcessors.ContainsKey(processorTuple)) continue; // ToDo: Handle properly
+                        if (!PollProcessors.ContainsKey(processorTuple)) continue; // ToDo: Handle properly
 
-                        _pollProcessors[processorTuple].ProcessBindMode(state);
+                        PollProcessors[processorTuple].ProcessBindMode(state);
                     }
                     Thread.Sleep(10);
                 }
 
-                while (_pollMode == PollMode.Subscription)
+                while (PollMode == PollMode.Subscription)
                 {
                     var data = _device.GetBufferedData();
                     foreach (var state in data)
                     {
                         var processorTuple = GetPollProcessorKey(state.Offset);
-                        if (!_pollProcessors.ContainsKey(processorTuple)    // ToDo: Should not happen in production, throw?
-                            || _pollProcessors[processorTuple].GetObserverCount() == 0)
+                        if (!PollProcessors.ContainsKey(processorTuple)    // ToDo: Should not happen in production, throw?
+                            || PollProcessors[processorTuple].GetObserverCount() == 0)
                             continue;
 
-                        _pollProcessors[processorTuple].ProcessSubscriptionMode(state);
+                        PollProcessors[processorTuple].ProcessSubscriptionMode(state);
                     }
                     Thread.Sleep(10);
                 }
