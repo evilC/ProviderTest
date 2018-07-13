@@ -110,6 +110,7 @@ namespace XInput
 
         private void InputEmptyEventHandler(object sender, EventArgs eventArgs)
         {
+            if (_bindModeObservers.Count > 0) return;
             var empty = true;
             foreach (var pollProcessor in _pollProcessors.Values)
             {

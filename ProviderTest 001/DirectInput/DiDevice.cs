@@ -91,7 +91,9 @@ namespace DirectInput
         private void InputEmptyEventHandler(object sender, EventArgs eventArgs)
         {
             // An Input has indicated that it has no more subscriptions
-            // Check all inputs, and if none have any subscriptions, then this device is unused, and can be disposed
+            // Check all inputs, and if none have any subscriptions, then this device is unused, and can be disposed...
+            // ... UNLESS, there are Bind Mode subscriptions active, in which case do not dispose
+            if (_bindModeObservers.Count > 0) return;
             var empty = true;
             foreach (var pollProcessor in _pollProcessors.Values)
             {

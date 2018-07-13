@@ -40,6 +40,8 @@ namespace TestApp
             //xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
             //xi.SubscribeInput(new InputDescriptor(xbox1, pov1Down), new TestObserver("XBox Pad 1 Dpad Down"));
 
+            di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode: "));
+
             var b1 = di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
             b1.Dispose();
             //di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
