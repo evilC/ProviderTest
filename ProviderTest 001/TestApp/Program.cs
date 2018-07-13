@@ -40,10 +40,11 @@ namespace TestApp
             //xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
             //xi.SubscribeInput(new InputDescriptor(xbox1, pov1Down), new TestObserver("XBox Pad 1 Dpad Down"));
 
-            di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode: "));
+            var xbm = di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode: "));
 
             var b1 = di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
             b1.Dispose();
+            xbm.Dispose();
             //di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
             //di.SubscribeInput(new InputDescriptor(divJoy, button128), new TestObserver("DI vJoy Button 128"));
             //di.SubscribeInput(new InputDescriptor(divJoy, pov1Down), new TestObserver("DI vJoy POV 1 Down"));
@@ -57,6 +58,7 @@ namespace TestApp
             //di.SubscribeInput(new InputDescriptor(diT16K, button1), new TestObserver("DI T16k Button 1"));
             //di.SubscribeInput(new InputDescriptor(diT16K, axis1), new TestObserver("DI T16k Axis X"));
 
+            Console.ReadLine();
         }
     }
 

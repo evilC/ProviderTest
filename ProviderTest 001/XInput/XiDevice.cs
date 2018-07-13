@@ -98,14 +98,35 @@ namespace XInput
             for (var i = 0; i < 10; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, OnBindMode);
+                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
 
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, 0, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, OnBindMode);
+                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
+        }
+
+        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
+        {
+            var tuple = subReq.BindingDescriptor.ToTuple();
+            return _pollProcessors[tuple].Subscribe(subReq, observer);
+        }
+
+        private void BindModeEventHandler(object sender, InputReportEventArgs inputReportEventArgs)
+        {
+            foreach (var bindModeObserver in _bindModeObservers)
+            {
+                bindModeObserver.OnNext(inputReportEventArgs.InputModeReport);
+            }
+        }
+
+        // Bind Mode subscribe
+        public IDisposable Subscribe(IObserver<InputModeReport> observer)
+        {
+            _bindModeObservers.Add(observer);
+            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer, BindModeEmptyEventHandler);
         }
 
         private void InputEmptyEventHandler(object sender, EventArgs eventArgs)
@@ -123,31 +144,22 @@ namespace XInput
             OnDeviceEmpty(this, new DeviceEmptyEventArgs(_deviceDescriptor));
         }
 
-        public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
-        {
-            var tuple = subReq.BindingDescriptor.ToTuple();
-            return _pollProcessors[tuple].Subscribe(subReq, observer);
-        }
-
-        private void OnBindMode(object sender, InputReportEventArgs inputReportEventArgs)
-        {
-            foreach (var bindModeObserver in _bindModeObservers)
-            {
-                bindModeObserver.OnNext(inputReportEventArgs.InputModeReport);
-            }
-        }
-
-        // Bind Mode subscribe
-        public IDisposable Subscribe(IObserver<InputModeReport> observer)
-        {
-            _bindModeObservers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer, OnBindModeEmpty);
-        }
-
-        private void OnBindModeEmpty(object sender, EventArgs eventArgs)
+        private void BindModeEmptyEventHandler(object sender, EventArgs eventArgs)
         {
             throw new NotImplementedException();
         }
+
+        private bool DeviceHasSubscriptionObservers()
+        {
+            foreach (var pollProcessor in _pollProcessors.Values)
+            {
+                if (pollProcessor.GetObserverCount() == 0) continue;
+                return true;
+            }
+
+            return false;
+        }
+
 
         public void SetBindModeState(bool state)
         {

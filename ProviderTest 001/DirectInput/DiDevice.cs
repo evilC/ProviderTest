@@ -47,13 +47,7 @@ namespace DirectInput
         public IDisposable Subscribe(IObserver<InputModeReport> observer)
         {
             _bindModeObservers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer, OnBindModeEmpty);
-        }
-
-        // Fired when the last subscriber unsubsribes in Bind Mode
-        private void OnBindModeEmpty(object sender, EventArgs eventArgs)
-        {
-            throw new NotImplementedException();
+            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer, BindModeEmptyEventHandler);
         }
 
         #endregion
@@ -78,13 +72,13 @@ namespace DirectInput
             for (var i = 0; i < 128; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiButtonProcessor(descriptor, InputEmptyEventHandler, OnBindMode);
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiButtonProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
 
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiPovProcessor(descriptor, InputEmptyEventHandler, OnBindMode);
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiPovProcessor(descriptor, InputEmptyEventHandler, BindModeEventHandler);
             }
         }
 
@@ -93,20 +87,32 @@ namespace DirectInput
             // An Input has indicated that it has no more subscriptions
             // Check all inputs, and if none have any subscriptions, then this device is unused, and can be disposed...
             // ... UNLESS, there are Bind Mode subscriptions active, in which case do not dispose
-            if (_bindModeObservers.Count > 0) return;
-            var empty = true;
-            foreach (var pollProcessor in _pollProcessors.Values)
-            {
-                if (pollProcessor.GetObserverCount() == 0) continue;
-                empty = false;
-                break;
-            }
-            if (!empty) return;
+            if (_bindModeObservers.Count > 0 || DeviceHasSubscriptionObservers()) return;
 
             OnDeviceEmpty(this, new DeviceEmptyEventArgs(_deviceDescriptor));
         }
 
-        private void OnBindMode(object sender, InputReportEventArgs inputReportEventArgs)
+        // Fired when the last subscriber unsubsribes in Bind Mode
+        private void BindModeEmptyEventHandler(object sender, EventArgs eventArgs)
+        {
+            if (DeviceHasSubscriptionObservers()) return;
+
+            OnDeviceEmpty(this, new DeviceEmptyEventArgs(_deviceDescriptor));
+        }
+
+        private bool DeviceHasSubscriptionObservers()
+        {
+            foreach (var pollProcessor in _pollProcessors.Values)
+            {
+                if (pollProcessor.GetObserverCount() == 0) continue;
+                return true;
+            }
+
+            return false;
+        }
+
+
+        private void BindModeEventHandler(object sender, InputReportEventArgs inputReportEventArgs)
         {
             foreach (var bindModeObserver in _bindModeObservers)
             {
