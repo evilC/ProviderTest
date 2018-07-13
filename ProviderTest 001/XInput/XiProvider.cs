@@ -33,8 +33,14 @@ namespace XInput
         {
             if (!_devices.ContainsKey(deviceDescriptor))
             {
-                _devices.Add(deviceDescriptor, new XiDevice(deviceDescriptor));
+                _devices.Add(deviceDescriptor, new XiDevice(deviceDescriptor, DeviceEmptyEventHandler));
             }
+        }
+
+        private void DeviceEmptyEventHandler(object sender, DeviceEmptyEventArgs deviceEmptyEventArgs)
+        {
+            _devices[deviceEmptyEventArgs.DeviceDescriptor].Dispose();
+            _devices.Remove(deviceEmptyEventArgs.DeviceDescriptor);
         }
 
         public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputModeReport> observer)

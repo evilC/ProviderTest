@@ -11,6 +11,7 @@ namespace XInput
     class XiButtonProcessor : IPollProcessor<State>, IObservableInput<InputModeReport>
     {
         public EventHandler<InputReportEventArgs> OnBindMode;
+        private readonly EventHandler _observerListEmptyEventHandler;
         private readonly InputDescriptor _inputDescriptor;
         private readonly List<IObserver<InputModeReport>> _observers = new List<IObserver<InputModeReport>>();
         private readonly GamepadButtonFlags _gamepadButtonFlag;
@@ -24,8 +25,9 @@ namespace XInput
             GamepadButtonFlags.DPadUp, GamepadButtonFlags.DPadRight, GamepadButtonFlags.DPadDown, GamepadButtonFlags.DPadLeft
         };
 
-        public XiButtonProcessor(InputDescriptor inputDescriptor, EventHandler<InputReportEventArgs> bindModeHandler)
+        public XiButtonProcessor(InputDescriptor inputDescriptor, EventHandler observerListEmptyEventHandler, EventHandler<InputReportEventArgs> bindModeHandler)
         {
+            _observerListEmptyEventHandler = observerListEmptyEventHandler;
             OnBindMode += bindModeHandler;
             _inputDescriptor = inputDescriptor;
             var index = inputDescriptor.BindingDescriptor.Type == BindingType.Button
@@ -93,7 +95,7 @@ namespace XInput
         public IDisposable Subscribe(IObserver<InputModeReport> observer)
         {
             _observers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_observers, observer);
+            return new ObservableUnsubscriber<InputModeReport>(_observers, observer, _observerListEmptyEventHandler);
         }
         #endregion
     }

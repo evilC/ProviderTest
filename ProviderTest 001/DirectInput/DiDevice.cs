@@ -18,9 +18,12 @@ namespace DirectInput
         private PollMode _pollMode = PollMode.Subscription;
         private readonly Thread _pollThread;
 
-        public DiDevice(DeviceDescriptor deviceDescriptor)
+        public EventHandler<DeviceEmptyEventArgs> OnDeviceEmpty;
+
+        public DiDevice(DeviceDescriptor deviceDescriptor, EventHandler<DeviceEmptyEventArgs> deviceEmptyEventHandler)
         {
             _deviceDescriptor = deviceDescriptor;
+            OnDeviceEmpty = deviceEmptyEventHandler;
             BuildPollProcessors();
 
             var guid = DiWrapper.Instance.ConnectedDevices[deviceDescriptor.DeviceHandle][deviceDescriptor.DeviceInstance];
@@ -44,7 +47,13 @@ namespace DirectInput
         public IDisposable Subscribe(IObserver<InputModeReport> observer)
         {
             _bindModeObservers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer);
+            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer, OnBindModeEmpty);
+        }
+
+        // Fired when the last subscriber unsubsribes in Bind Mode
+        private void OnBindModeEmpty(object sender, EventArgs eventArgs)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -69,14 +78,30 @@ namespace DirectInput
             for (var i = 0; i < 128; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiButtonProcessor(descriptor, OnBindMode);
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiButtonProcessor(descriptor, InputEmptyEventHandler, OnBindMode);
             }
 
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiPovProcessor(descriptor, OnBindMode);
+                _pollProcessors[descriptor.BindingDescriptor.ToShortTuple()] = new DiPovProcessor(descriptor, InputEmptyEventHandler, OnBindMode);
             }
+        }
+
+        private void InputEmptyEventHandler(object sender, EventArgs eventArgs)
+        {
+            // An Input has indicated that it has no more subscriptions
+            // Check all inputs, and if none have any subscriptions, then this device is unused, and can be disposed
+            var empty = true;
+            foreach (var pollProcessor in _pollProcessors.Values)
+            {
+                if (pollProcessor.GetObserverCount() == 0) continue;
+                empty = false;
+                break;
+            }
+            if (!empty) return;
+
+            OnDeviceEmpty(this, new DeviceEmptyEventArgs(_deviceDescriptor));
         }
 
         private void OnBindMode(object sender, InputReportEventArgs inputReportEventArgs)

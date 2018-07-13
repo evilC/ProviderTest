@@ -11,13 +11,15 @@ namespace DirectInput
     class DiPovProcessor : IPollProcessor<JoystickUpdate>
     {
         private readonly List<DiPovDirectionProcessor> _directionProcessors = new List<DiPovDirectionProcessor>();
+        private readonly EventHandler _observerListEmptyEventHandler;
 
-        public DiPovProcessor(InputDescriptor inputDescriptor, EventHandler<InputReportEventArgs> bindModeHandler)
+        public DiPovProcessor(InputDescriptor inputDescriptor, EventHandler observerListEmptyEventHandler, EventHandler<InputReportEventArgs> bindModeHandler)
         {
+            _observerListEmptyEventHandler = observerListEmptyEventHandler;
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(inputDescriptor.DeviceDescriptor, new BindingDescriptor(BindingType.POV, inputDescriptor.BindingDescriptor.Index, i));
-                _directionProcessors.Add(new DiPovDirectionProcessor(descriptor, bindModeHandler));
+                _directionProcessors.Add(new DiPovDirectionProcessor(descriptor, observerListEmptyEventHandler, bindModeHandler));
             }
         }
 

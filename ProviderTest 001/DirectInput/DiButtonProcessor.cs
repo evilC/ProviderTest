@@ -11,12 +11,14 @@ namespace DirectInput
     class DiButtonProcessor : IPollProcessor<JoystickUpdate>, IObservableInput<InputModeReport>
     {
         public EventHandler<InputReportEventArgs> OnBindMode;
+        private readonly EventHandler _observerListEmptyEventHandler;
 
         private readonly InputDescriptor _inputDescriptor;
         private readonly List<IObserver<InputModeReport>> _observers = new List<IObserver<InputModeReport>>();
 
-        public DiButtonProcessor(InputDescriptor inputDescriptor, EventHandler<InputReportEventArgs> bindModeHandler)
+        public DiButtonProcessor(InputDescriptor inputDescriptor, EventHandler observerListEmptyEventHandler , EventHandler<InputReportEventArgs> bindModeHandler)
         {
+            _observerListEmptyEventHandler = observerListEmptyEventHandler;
             _inputDescriptor = inputDescriptor;
             OnBindMode += bindModeHandler;
         }
@@ -49,7 +51,7 @@ namespace DirectInput
         public IDisposable Subscribe(IObserver<InputModeReport> observer)
         {
             _observers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_observers, observer);
+            return new ObservableUnsubscriber<InputModeReport>(_observers, observer, _observerListEmptyEventHandler);
         }
 
         public int GetObserverCount()

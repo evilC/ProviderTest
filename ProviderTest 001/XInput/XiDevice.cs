@@ -17,11 +17,13 @@ namespace XInput
 
         private PollMode _pollMode = PollMode.Subscription;
         private readonly Thread _pollThread;
+        public EventHandler<DeviceEmptyEventArgs> OnDeviceEmpty;
 
         private readonly Controller _device;
 
-        public XiDevice(DeviceDescriptor deviceDescriptor)
+        public XiDevice(DeviceDescriptor deviceDescriptor, EventHandler<DeviceEmptyEventArgs> deviceEmptyEventHandler)
         {
+            OnDeviceEmpty = deviceEmptyEventHandler;
             _device = new Controller((UserIndex)deviceDescriptor.DeviceInstance);
 
             BuildPollProcessors();
@@ -96,14 +98,28 @@ namespace XInput
             for (var i = 0; i < 10; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.Button, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, OnBindMode);
+                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, OnBindMode);
             }
 
             for (var i = 0; i < 4; i++)
             {
                 var descriptor = new InputDescriptor(_deviceDescriptor, new BindingDescriptor(BindingType.POV, 0, i));
-                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, OnBindMode);
+                _pollProcessors[descriptor.BindingDescriptor.ToTuple()] = new XiButtonProcessor(descriptor, InputEmptyEventHandler, OnBindMode);
             }
+        }
+
+        private void InputEmptyEventHandler(object sender, EventArgs eventArgs)
+        {
+            var empty = true;
+            foreach (var pollProcessor in _pollProcessors.Values)
+            {
+                if (pollProcessor.GetObserverCount() == 0) continue;
+                empty = false;
+                break;
+            }
+            if (!empty) return;
+
+            OnDeviceEmpty(this, new DeviceEmptyEventArgs(_deviceDescriptor));
         }
 
         public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputModeReport> observer)
@@ -124,7 +140,12 @@ namespace XInput
         public IDisposable Subscribe(IObserver<InputModeReport> observer)
         {
             _bindModeObservers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer);
+            return new ObservableUnsubscriber<InputModeReport>(_bindModeObservers, observer, OnBindModeEmpty);
+        }
+
+        private void OnBindModeEmpty(object sender, EventArgs eventArgs)
+        {
+            throw new NotImplementedException();
         }
 
         public void SetBindModeState(bool state)

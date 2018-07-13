@@ -26,8 +26,14 @@ namespace DirectInput
         {
             if (!_devices.ContainsKey(deviceDescriptor))
             {
-                _devices.Add(deviceDescriptor, new DiDevice(deviceDescriptor));
+                _devices.Add(deviceDescriptor, new DiDevice(deviceDescriptor, DeviceEmptyEventHandler));
             }
+        }
+
+        private void DeviceEmptyEventHandler(object sender, DeviceEmptyEventArgs deviceEmptyEventArgs)
+        {
+            _devices[deviceEmptyEventArgs.DeviceDescriptor].Dispose();
+            _devices.Remove(deviceEmptyEventArgs.DeviceDescriptor);
         }
 
         public IDisposable SubscribeBindMode(DeviceDescriptor deviceDescriptor, IObserver<InputModeReport> observer)

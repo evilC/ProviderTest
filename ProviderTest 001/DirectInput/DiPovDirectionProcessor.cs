@@ -12,9 +12,11 @@ namespace DirectInput
         private int _lastState;
         private readonly List<IObserver<InputModeReport>> _observers = new List<IObserver<InputModeReport>>();
         public EventHandler<InputReportEventArgs> OnBindMode;
+        private readonly EventHandler _observerListEmptyEventHandler;
 
-        public DiPovDirectionProcessor(InputDescriptor inputDescriptor, EventHandler<InputReportEventArgs> bindModeHandler)
+        public DiPovDirectionProcessor(InputDescriptor inputDescriptor, EventHandler observerListEmptyEventHandler, EventHandler<InputReportEventArgs> bindModeHandler)
         {
+            _observerListEmptyEventHandler = observerListEmptyEventHandler;
             _inputDescriptor = inputDescriptor;
             _thisAngle = _inputDescriptor.BindingDescriptor.SubIndex * 9000;
             OnBindMode += bindModeHandler;
@@ -23,7 +25,7 @@ namespace DirectInput
         public IDisposable Subscribe(IObserver<InputModeReport> observer)
         {
             _observers.Add(observer);
-            return new ObservableUnsubscriber<InputModeReport>(_observers, observer);
+            return new ObservableUnsubscriber<InputModeReport>(_observers, observer, _observerListEmptyEventHandler);
         }
 
         public IDisposable Subscribe(InputDescriptor subReq, IObserver<InputModeReport> observer)
