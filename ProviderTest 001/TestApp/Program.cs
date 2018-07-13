@@ -35,16 +35,12 @@ namespace TestApp
             var diT16K = new DeviceDescriptor("VID_044F&PID_B10A");
             var xbox1 = new DeviceDescriptor("Xbox");
 
-            //xi.SubscribeBindMode(xbox1, new BindModeObserver("Bind Mode:"));
+            var xiBm = xi.SubscribeBindMode(xbox1, new BindModeObserver("Bind Mode:"));
             //xi.SetBindModeState(xbox1, true);
-            //xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
-            //xi.SubscribeInput(new InputDescriptor(xbox1, pov1Down), new TestObserver("XBox Pad 1 Dpad Down"));
+            var xiS1 = xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
+            xi.SubscribeInput(new InputDescriptor(xbox1, pov1Down), new TestObserver("XBox Pad 1 Dpad Down"));
 
-            var xbm = di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode: "));
-
-            var b1 = di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
-            //b1.Dispose();
-            //xbm.Dispose();
+            var diS1 = di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
             di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
             di.SubscribeInput(new InputDescriptor(divJoy, button128), new TestObserver("DI vJoy Button 128"));
             di.SubscribeInput(new InputDescriptor(divJoy, pov1Down), new TestObserver("DI vJoy POV 1 Down"));
@@ -52,13 +48,21 @@ namespace TestApp
             di.SubscribeInput(new InputDescriptor(divJoy, pov2Down), new TestObserver("DI vJoy POV 2 Down"));
             di.SubscribeInput(new InputDescriptor(divJoy, pov2Left), new TestObserver("DI vJoy POV 2 Left"));
 
-            //di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode:"));
+            var diBm = di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode:"));
             //di.SetBindModeState(divJoy, true);
 
             //di.SubscribeInput(new InputDescriptor(diT16K, button1), new TestObserver("DI T16k Button 1"));
             //di.SubscribeInput(new InputDescriptor(diT16K, axis1), new TestObserver("DI T16k Axis X"));
 
             Console.ReadLine();
+
+            // Cancel subscriptions by disposing the IDisposable that a subscription request call returns
+            // App will not exit until all subscriptions are disposed
+            xiS1.Dispose();
+            xiBm.Dispose();
+
+            diS1.Dispose();
+            diBm.Dispose();
         }
     }
 
