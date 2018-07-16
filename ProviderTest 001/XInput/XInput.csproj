@@ -52,6 +52,7 @@
     <Compile Include="XiDevice.cs" />
     <Compile Include="XiProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XiReportHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

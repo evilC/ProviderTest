@@ -50,6 +50,8 @@
     <Compile Include="ObservableUnsubscriber.cs" />
     <Compile Include="PovHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReportHandler.cs" />
+    <Compile Include="Reports.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

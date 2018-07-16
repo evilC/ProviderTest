@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DiReportHandler.cs" />
     <Compile Include="PollProcessors\DiAxisProcessor.cs" />
     <Compile Include="PollProcessors\DiButtonProcessor.cs" />
     <Compile Include="DiDevice.cs" />

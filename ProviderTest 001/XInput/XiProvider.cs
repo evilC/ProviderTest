@@ -8,9 +8,10 @@ using SharpDX.XInput;
 
 namespace XInput
 {
-    public class XiProvider
+    public class XiProvider : IProvider
     {
         private readonly Dictionary<DeviceDescriptor, XiDevice> _devices = new Dictionary<DeviceDescriptor, XiDevice>();
+        private readonly XiReportHandler _xiReportHandler = new XiReportHandler();
 
         public XiProvider()
         {
@@ -47,6 +48,11 @@ namespace XInput
         {
             CreateDevice(deviceDescriptor);
             return _devices[deviceDescriptor].Subscribe(observer);
+        }
+
+        public ProviderReport GetInputList()
+        {
+            return _xiReportHandler.GetInputList();
         }
     }
 }

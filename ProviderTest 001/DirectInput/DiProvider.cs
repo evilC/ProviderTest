@@ -7,9 +7,10 @@ using Common;
 
 namespace DirectInput
 {
-    public class DiProvider : IDisposable
+    public class DiProvider : IProvider, IDisposable
     {
         private readonly Dictionary<DeviceDescriptor, DiDevice> _devices = new Dictionary<DeviceDescriptor, DiDevice>();
+        private readonly DiReportHandler _diReportHandler = new DiReportHandler();
 
         public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputReport> observer)
         {
@@ -50,6 +51,11 @@ namespace DirectInput
 
         public void Dispose()
         {
+        }
+
+        public ProviderReport GetInputList()
+        {
+            return _diReportHandler.GetInputList();
         }
     }
 }

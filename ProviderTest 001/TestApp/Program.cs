@@ -16,6 +16,9 @@ namespace TestApp
             var di = new DiProvider();
             var xi = new XiProvider();
 
+            //var diList = di.GetInputList();
+            //var xiList = xi.GetInputList();
+
             var axis1 = new BindingDescriptor(BindingType.Axis, 0);
             var axis2 = new BindingDescriptor(BindingType.Axis, 1);
             var axis6 = new BindingDescriptor(BindingType.Axis, 5);

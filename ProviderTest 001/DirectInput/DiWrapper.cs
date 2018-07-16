@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common;
 using SharpDX.DirectInput;
 
 namespace DirectInput
@@ -41,7 +42,6 @@ namespace DirectInput
             }
         }
 
-        /*
         public Guid DeviceDescriptorToInstanceGuid(DeviceDescriptor deviceDescriptor)
         {
             if (ConnectedDevices.ContainsKey(deviceDescriptor.DeviceHandle)
@@ -52,7 +52,6 @@ namespace DirectInput
             throw new Exception($"Could not find device Handle {deviceDescriptor.DeviceHandle}, Instance {deviceDescriptor.DeviceInstance}");
             //return Guid.Empty;
         }
-        */
 
         public static bool IsStickType(DeviceInstance deviceInstance)
         {

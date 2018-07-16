@@ -57,6 +57,18 @@ namespace Common
     }
 
     /// <summary>
+    /// Identifies the Provider responsible for handling the Binding
+    /// </summary>
+    public class ProviderDescriptor
+    {
+        /// <summary>
+        /// The API implementation that handles this input
+        /// This should be unique
+        /// </summary>
+        public string ProviderName { get; set; }
+    }
+
+    /// <summary>
     /// Identifies a device within a Provider
     /// </summary>
     public struct DeviceDescriptor

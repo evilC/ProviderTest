@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace Common
 {
+    public interface IProvider
+    {
+        ProviderReport GetInputList();
+    }
+
     /// <summary>
     /// IPollProcessor classes can process (or route) Subsription Requests / Poll data
     /// The class does not need to handle Subscription or poll itself, it may just forward the request on to another class
