@@ -68,8 +68,8 @@ namespace TestApp
 
             // Cancel subscriptions by disposing the IDisposable that a subscription request call returns
             // App will not exit until all subscriptions are disposed
-            //xiS1.Dispose();
-            //xiBm.Dispose();
+            xiS1.Dispose();
+            xiBm.Dispose();
 
             diS1.Dispose();
             diBm.Dispose();
