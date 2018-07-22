@@ -32,6 +32,10 @@ namespace XInput
 
         private void CreateDevice(DeviceDescriptor deviceDescriptor)
         {
+            if (deviceDescriptor.DeviceInstance > 3)
+            {
+                throw new ArgumentOutOfRangeException($"Instance must be between 0 and 3");
+            }
             if (!_devices.ContainsKey(deviceDescriptor))
             {
                 _devices.Add(deviceDescriptor, new XiDevice(deviceDescriptor, DeviceEmptyEventHandler));

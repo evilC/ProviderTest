@@ -41,11 +41,11 @@ namespace TestApp
             var xbox1 = new DeviceDescriptor("Xbox");
             var motor49 = new DeviceDescriptor("MOTÖR49 Keyboard", 0);
 
-            //var xiBm = xi.SubscribeBindMode(xbox1, new BindModeObserver("Bind Mode:"));
-            //xi.SetBindModeState(xbox1, true);
-            //var xiS1 = xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
-            //xi.SubscribeInput(new InputDescriptor(xbox1, axis1), new TestObserver("XBox Axis LS X"));
-            //xi.SubscribeInput(new InputDescriptor(xbox1, pov1Down), new TestObserver("XBox Pad 1 Dpad Down"));
+            var xiBm = xi.SubscribeBindMode(xbox1, new BindModeObserver("Bind Mode:"));
+            xi.SetBindModeState(xbox1, true);
+            var xiS1 = xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
+            xi.SubscribeInput(new InputDescriptor(xbox1, axis1), new TestObserver("XBox Axis LS X"));
+            xi.SubscribeInput(new InputDescriptor(xbox1, pov1Down), new TestObserver("XBox Pad 1 Dpad Down"));
 
             var diS1 = di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
             di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));

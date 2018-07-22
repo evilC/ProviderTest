@@ -30,7 +30,12 @@ namespace XInput
         {
             while (true)
             {
-                while (PollMode == PollMode.Bind)
+                while (!_device.IsConnected)
+                {
+                    Thread.Sleep(500);
+                }
+
+                while (_device.IsConnected && PollMode == PollMode.Bind)
                 {
                     var thisState = _device.GetState();
                     // Axes
@@ -57,7 +62,7 @@ namespace XInput
                     Thread.Sleep(10);
                 }
 
-                while (PollMode == PollMode.Subscription)
+                while (_device.IsConnected && PollMode == PollMode.Subscription)
                 {
                     var thisState = _device.GetState();
                     // Axes
