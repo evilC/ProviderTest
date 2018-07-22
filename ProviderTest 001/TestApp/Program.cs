@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Common;
 using DirectInput;
+using MIDI;
 using XInput;
 
 namespace TestApp
@@ -15,6 +16,7 @@ namespace TestApp
         {
             var di = new DiProvider();
             var xi = new XiProvider();
+            var midi = new MidiProvider();
 
             //var diList = di.GetInputList();
             //var xiList = xi.GetInputList();
@@ -37,12 +39,13 @@ namespace TestApp
             var divJoy = new DeviceDescriptor("VID_1234&PID_BEAD");
             var diT16K = new DeviceDescriptor("VID_044F&PID_B10A");
             var xbox1 = new DeviceDescriptor("Xbox");
+            var motor49 = new DeviceDescriptor("MOTÖR49 Keyboard", 0);
 
-            var xiBm = xi.SubscribeBindMode(xbox1, new BindModeObserver("Bind Mode:"));
+            //var xiBm = xi.SubscribeBindMode(xbox1, new BindModeObserver("Bind Mode:"));
             //xi.SetBindModeState(xbox1, true);
-            var xiS1 = xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
-            xi.SubscribeInput(new InputDescriptor(xbox1, axis1), new TestObserver("XBox Axis LS X"));
-            xi.SubscribeInput(new InputDescriptor(xbox1, pov1Down), new TestObserver("XBox Pad 1 Dpad Down"));
+            //var xiS1 = xi.SubscribeInput(new InputDescriptor(xbox1, button1), new TestObserver("XBox Pad 1 Button A"));
+            //xi.SubscribeInput(new InputDescriptor(xbox1, axis1), new TestObserver("XBox Axis LS X"));
+            //xi.SubscribeInput(new InputDescriptor(xbox1, pov1Down), new TestObserver("XBox Pad 1 Dpad Down"));
 
             var diS1 = di.SubscribeInput(new InputDescriptor(divJoy, button1), new TestObserver("DI vJoy Button 1"));
             di.SubscribeInput(new InputDescriptor(divJoy, button2), new TestObserver("DI vJoy Button 2"));
@@ -59,12 +62,14 @@ namespace TestApp
             //di.SubscribeInput(new InputDescriptor(diT16K, button1), new TestObserver("DI T16k Button 1"));
             //di.SubscribeInput(new InputDescriptor(diT16K, axis1), new TestObserver("DI T16k Axis X"));
 
+            midi.SubscribeBindMode(motor49, new BindModeObserver("MIDI"));
+
             Console.ReadLine();
 
             // Cancel subscriptions by disposing the IDisposable that a subscription request call returns
             // App will not exit until all subscriptions are disposed
-            xiS1.Dispose();
-            xiBm.Dispose();
+            //xiS1.Dispose();
+            //xiBm.Dispose();
 
             diS1.Dispose();
             diBm.Dispose();
