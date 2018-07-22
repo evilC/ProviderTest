@@ -59,8 +59,8 @@ namespace TestApp
             var diBm = di.SubscribeBindMode(divJoy, new BindModeObserver("Bind Mode:"));
             //di.SetBindModeState(divJoy, true);
 
-            //di.SubscribeInput(new InputDescriptor(diT16K, button1), new TestObserver("DI T16k Button 1"));
-            //di.SubscribeInput(new InputDescriptor(diT16K, axis1), new TestObserver("DI T16k Axis X"));
+            di.SubscribeInput(new InputDescriptor(diT16K, button1), new TestObserver("DI T16k Button 1"));
+            di.SubscribeInput(new InputDescriptor(diT16K, axis1), new TestObserver("DI T16k Axis X"));
 
             midi.SubscribeBindMode(motor49, new BindModeObserver("MIDI"));
 

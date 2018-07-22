@@ -11,7 +11,7 @@ namespace DirectInput
 {
     public class DiWrapper
     {
-        public ConcurrentDictionary<string, List<Guid>> ConnectedDevices { get; private set; } = new ConcurrentDictionary<string, List<Guid>>();
+        public ConcurrentDictionary<string, List<Guid>> ConnectedDevices { get; } = new ConcurrentDictionary<string, List<Guid>>();
 
         #region Singleton setup
         private static DiWrapper _instance;
@@ -26,19 +26,33 @@ namespace DirectInput
 
         public void RefreshConnectedDevices()
         {
-            ConnectedDevices = new ConcurrentDictionary<string, List<Guid>>();
+            //ConnectedDevices = new ConcurrentDictionary<string, List<Guid>>();
             var diDeviceInstances = DiInstance.GetDevices();
+            var connectedHandles = ConnectedDevices.Keys.ToList();
             foreach (var device in diDeviceInstances)
             {
                 if (!IsStickType(device))
                     continue;
                 var joystick = new Joystick(DiInstance, device.InstanceGuid);
                 var handle = JoystickToHandle(joystick);
-                if (!ConnectedDevices.ContainsKey(handle))
+                if (connectedHandles.Contains(handle)) connectedHandles.Remove(handle);
+                if (ConnectedDevices.ContainsKey(handle))
+                {
+                    if (ConnectedDevices[handle].Contains(device.InstanceGuid))
+                    {
+                        continue;
+                    }
+                }
+                else
                 {
                     ConnectedDevices[handle] = new List<Guid>();
                 }
                 ConnectedDevices[handle].Add(device.InstanceGuid);
+            }
+
+            foreach (var connectedHandle in connectedHandles)
+            {
+                ConnectedDevices.TryRemove(connectedHandle, out _);
             }
         }
 

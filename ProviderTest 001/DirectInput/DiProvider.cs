@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Common;
 
@@ -11,13 +12,39 @@ namespace DirectInput
     {
         private readonly Dictionary<DeviceDescriptor, DiDevice> _devices = new Dictionary<DeviceDescriptor, DiDevice>();
         private readonly DiReportHandler _diReportHandler = new DiReportHandler();
+        private readonly Thread _deviceWatcherThread;
+
+        public DiProvider()
+        {
+            _deviceWatcherThread = new Thread(DeviceWatcherThread);
+            _deviceWatcherThread.Start();
+        }
+
+        // Used to detect device connect / disconnect
+        private void DeviceWatcherThread()
+        {
+            while (true)
+            {
+                DiWrapper.Instance.RefreshConnectedDevices();
+                foreach (var device in _devices)
+                {
+                    if (!device.Value.Acquired &&
+                        DiWrapper.Instance.ConnectedDevices.ContainsKey(device.Key.DeviceHandle)
+                        && DiWrapper.Instance.ConnectedDevices[device.Key.DeviceHandle].Count >= device.Key.DeviceInstance)
+                    {
+                        device.Value.SetAcquireState(true);
+                    }
+                }
+                Thread.Sleep(500);
+            }
+        }
 
         public IDisposable SubscribeInput(InputDescriptor subReq, IObserver<InputReport> observer)
         {
-            if (!DiWrapper.Instance.ConnectedDevices.ContainsKey(subReq.DeviceDescriptor.DeviceHandle))
-            {
-                throw new Exception("Device not found");
-            }
+            //if (!DiWrapper.Instance.ConnectedDevices.ContainsKey(subReq.DeviceDescriptor.DeviceHandle))
+            //{
+            //    throw new Exception("Device not found");
+            //}
 
             CreateDevice(subReq.DeviceDescriptor);
             return _devices[subReq.DeviceDescriptor].SubscribeInput(subReq, observer);
@@ -51,6 +78,8 @@ namespace DirectInput
 
         public void Dispose()
         {
+            _deviceWatcherThread.Abort();
+            _deviceWatcherThread.Join();
         }
 
         public ProviderReport GetInputList()

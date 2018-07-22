@@ -6,33 +6,92 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common;
 using DirectInput.PollProcessors;
+using SharpDX;
 using SharpDX.DirectInput;
 
 namespace DirectInput
 {
     public class DiDevice : InputDevice<JoystickUpdate, (BindingType, int)>
     {
-        private readonly Joystick _device;
-        private readonly Thread _pollThread;
+        private Joystick _device;
+        private Thread _pollThread;
+
+        private bool _pollThreadRunning = false;
 
         public DiDevice(DeviceDescriptor deviceDescriptor, EventHandler<DeviceEmptyEventArgs> deviceEmptyEventHandler) : base(deviceDescriptor, deviceEmptyEventHandler)
         {
-            var guid = DiWrapper.Instance.ConnectedDevices[deviceDescriptor.DeviceHandle][deviceDescriptor.DeviceInstance];
-            _device = new Joystick(DiWrapper.DiInstance, guid);
-            _device.Properties.BufferSize = 128;
-            _device.Acquire();
-
             BuildPollProcessors();
+            SetAcquireState(true);
+        }
 
-            _pollThread = new Thread(PollThread);
-            _pollThread.Start();
+        public bool Acquired { get; private set; } = false;
+
+        public bool SetAcquireState(bool state)
+        {
+            if (Acquired == state) return true;
+            if (state)
+            {
+                if (!DiWrapper.Instance.ConnectedDevices.ContainsKey(DeviceDescriptor.DeviceHandle) || DiWrapper.Instance.ConnectedDevices[DeviceDescriptor.DeviceHandle].Count < DeviceDescriptor.DeviceInstance)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    var guid =
+                        DiWrapper.Instance.ConnectedDevices[DeviceDescriptor.DeviceHandle][
+                            DeviceDescriptor.DeviceInstance];
+                    _device = new Joystick(DiWrapper.DiInstance, guid);
+                    _device.Properties.BufferSize = 128;
+                    _device.Acquire();
+                    Acquired = true;
+                    Console.WriteLine($"Acquired Device {DeviceDescriptor.DeviceHandle}, Instance {DeviceDescriptor.DeviceInstance}");
+                    SetPollThreadState(true);
+                    return true;
+                }
+                catch
+                {
+                    _device?.Dispose();
+                }
+            }
+            else
+            {
+                _device?.Dispose();
+            }
+            Console.WriteLine($"Relinquished Device {DeviceDescriptor.DeviceHandle}, Instance {DeviceDescriptor.DeviceInstance}");
+            Acquired = false;
+            SetPollThreadState(false);
+            return false;
+        }
+
+        private void SetPollThreadState(bool state)
+        {
+            if (state == _pollThreadRunning)
+            {
+                Console.WriteLine($"Taking no action as Pollthread is already in state {state}");
+                return;
+            };
+            Console.WriteLine($"{(state ? "Starting" : "Stopping")} Di PollThread for Device {DeviceDescriptor.DeviceHandle}, Instance {DeviceDescriptor.DeviceInstance}");
+            if (state)
+            {
+                _pollThread = new Thread(PollThread);
+                _pollThread.Start();
+                _pollThreadRunning = true;
+            }
+            else
+            {
+                _pollThreadRunning = false;
+                _pollThread.Abort();
+                _pollThread.Join();
+                _pollThread = null;
+            }
         }
 
         public override void Dispose()
         {
-            _pollThread.Abort();
-            _pollThread.Join();
-            _device?.Dispose();
+            //SetPollThreadState(false);
+            SetAcquireState(false);
+            //_device?.Dispose();
         }
 
         public void BuildPollProcessors()
@@ -64,32 +123,44 @@ namespace DirectInput
         {
             while (true)
             {
-                while (PollMode == PollMode.Bind)
+                try
                 {
-                    var data = _device.GetBufferedData();
-                    foreach (var state in data)
+                    while (PollMode == PollMode.Bind)
                     {
-                        var processorTuple = GetPollProcessorKey(state.Offset);
-                        if (!PollProcessors.ContainsKey(processorTuple)) continue; // ToDo: Handle properly
+                        var data = _device.GetBufferedData();
+                        foreach (var state in data)
+                        {
+                            var processorTuple = GetPollProcessorKey(state.Offset);
+                            if (!PollProcessors.ContainsKey(processorTuple)) continue; // ToDo: Handle properly
 
-                        PollProcessors[processorTuple].ProcessBindMode(state);
+                            PollProcessors[processorTuple].ProcessBindMode(state);
+                        }
+
+                        Thread.Sleep(10);
                     }
-                    Thread.Sleep(10);
+
+                    while (PollMode == PollMode.Subscription)
+                    {
+                        var data = _device.GetBufferedData();
+                        foreach (var state in data)
+                        {
+                            var processorTuple = GetPollProcessorKey(state.Offset);
+                            if (!PollProcessors
+                                    .ContainsKey(processorTuple) // ToDo: Should not happen in production, throw?
+                                || PollProcessors[processorTuple].GetObserverCount() == 0)
+                                continue;
+
+                            PollProcessors[processorTuple].ProcessSubscriptionMode(state);
+                        }
+
+                        Thread.Sleep(10);
+                    }
                 }
-
-                while (PollMode == PollMode.Subscription)
+                catch (SharpDXException ex) when(ex.Descriptor.ApiCode == "InputLost")
                 {
-                    var data = _device.GetBufferedData();
-                    foreach (var state in data)
-                    {
-                        var processorTuple = GetPollProcessorKey(state.Offset);
-                        if (!PollProcessors.ContainsKey(processorTuple)    // ToDo: Should not happen in production, throw?
-                            || PollProcessors[processorTuple].GetObserverCount() == 0)
-                            continue;
-
-                        PollProcessors[processorTuple].ProcessSubscriptionMode(state);
-                    }
-                    Thread.Sleep(10);
+                    Console.WriteLine($"Connection Lost for Device {DeviceDescriptor.DeviceHandle}, Instance {DeviceDescriptor.DeviceInstance}");
+                    SetAcquireState(false);
+                    break;
                 }
             }
         }
